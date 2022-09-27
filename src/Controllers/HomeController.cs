@@ -18,7 +18,7 @@ namespace Financial.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
+        public IActionResult Expenses()
         {
             return View();
         }
