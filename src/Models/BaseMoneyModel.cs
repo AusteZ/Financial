@@ -1,6 +1,6 @@
 namespace Financial.Models
 {
-    public struct BaseMoneyModel
+    public class BaseMoneyModel
     {
         public string What { get; set; } = "Product";
         public string Where { get; set; } = "Place";
