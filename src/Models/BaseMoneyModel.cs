@@ -5,6 +5,7 @@ namespace Financial.Models
     public class BaseMoneyModel
     {
         public string What { get; set; } = "Product";
+        public string Category { get; set; } = "Type";
         public string Where { get; set; } = "Place";
         public decimal Amount { get; set; } = 0;
         public Currency Currency = Currency.Euro;
@@ -15,6 +16,31 @@ namespace Financial.Models
         Dollar,
         Pound
     }
+
+    /*
+        public struct Category
+        {
+            public string Name { get; set; }
+            public string Description { get; set; }
+            public static int Amount { get; private set; } = 0;
+
+            public Category()
+            {
+                Name = "";
+                Description = "";
+                Amount = 0;
+            }
+
+            public Category(string Type, string About)
+            {
+                Name = Type;
+                Description = About;
+                Amount++;
+            }
+        }
+    */
+
+
 
     public class BaseAllMoneyModel : IEnumerable
     {
