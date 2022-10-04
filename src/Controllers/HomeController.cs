@@ -6,7 +6,8 @@ namespace Financial.Controllers
 {
     public class HomeController : Controller
     {
-        private static List<BaseMoneyModel> expenseList = new List<BaseMoneyModel>();
+        private static 
+            List<BaseMoneyModel> expenseList = new List<BaseMoneyModel>();
 
         private readonly ILogger<HomeController> _logger;
 
@@ -24,9 +25,9 @@ namespace Financial.Controllers
         {
             return View(expenseList);
         }
-        public IActionResult ExpensesForm()
+        public IActionResult ExpensesForm(BaseMoneyModel expense = null)
         {
-            var expense = new BaseMoneyModel();
+            expense = expense ?? new BaseMoneyModel();
             return View(expense);
         }
         public IActionResult ExpenseLine(BaseMoneyModel bmm)
@@ -34,7 +35,11 @@ namespace Financial.Controllers
             expenseList.Add(bmm);
             return RedirectToAction(nameof(Expenses));
         }
-
+        public IActionResult ExpenseLineDelete(BaseMoneyModel removedLine)
+        {
+            expenseList.Remove(removedLine);
+            return RedirectToAction(nameof(Expenses));
+        }
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

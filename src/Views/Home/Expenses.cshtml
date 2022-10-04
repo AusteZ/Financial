@@ -46,34 +46,34 @@
     <body class = "blue">
 
         <!-- SIMPLE NAVBAR -->
-        <nav class="navbar navbar-expand-sm navbar-dark blue mb-3">
-            <div class="container">
-                <a class="navbar-brand" href="#">Hucha</a>
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Home" asp-action="Expenses">Expenses</a>
-                    </li>
-                    <!--<li class="nav-item">
-                        <a class="nav-link" href="#">Services</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Contact</a>
-                    </li>-->
-                </ul>
-            </div>
-        </nav>
+        
         <a asp-controller="Home" asp-action="ExpensesForm"><button class = "btn btn-light">Create New</button></a>
-        <ul class = "text-bg-white">
+
+        <table class="table text-bg-white">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Currency</th>
+                <th scope="col" colspan="2">Place</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
             @foreach(var expense in Model){
-                <li>
-                    You spent @expense.Amount on @expense.What in @expense.Where ;
-                </li>
+                <tr>
+                    <td>@expense.What</td>
+                    <td>@expense.Amount</td>
+                    <td>@expense.Currency</td>
+                    <td>@expense.Where</td>
+                    <td>
+                        <a class="btn btn-light" type="button" href="@Url.Action("ExpenseLineDelete","Home", new{removedLine = @expense})">Delete</a>
+                        <button class="btn btn-light" type="button">Edit</button>
+                    </td>
+                </tr>
             }
-            
-        </ul>
+        </tbody>
+    </table>
         
 
 
