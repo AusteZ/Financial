@@ -43,6 +43,14 @@ namespace Financial.Controllers
             
             return View(expense);
         }
+
+        public IActionResult CategoriesForm(BaseMoneyModel category = null)
+        {
+            category = category ?? new BaseMoneyModel();
+            return View(category);
+        }
+        
+
         public IActionResult ExpenseLine(BaseMoneyModel bmm)
         {
             expenselist.Add(bmm);
