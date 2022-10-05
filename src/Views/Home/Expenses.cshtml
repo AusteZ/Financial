@@ -1,4 +1,4 @@
-﻿@model List<BaseMoneyModel>
+﻿@model BaseAllMoneyModel
 
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -46,8 +46,8 @@
     <body class = "blue">
 
         <!-- SIMPLE NAVBAR -->
-        
-        <a asp-controller="Home" asp-action="ExpensesForm"><button class = "btn btn-light">Create New</button></a>
+        <a asp-controller="Home" asp-action="Save" class = "btn btn-light">Save</a>
+        <a asp-controller="Home" asp-action="ExpensesForm" class = "btn btn-light">Create New</a>
 
         <table class="table text-bg-white">
         <thead>
@@ -67,8 +67,19 @@
                     <td>@expense.Currency</td>
                     <td>@expense.Where</td>
                     <td>
-                        <a class="btn btn-light" type="button" href="@Url.Action("ExpenseLineDelete","Home", new{removedLine = @expense})">Delete</a>
-                        <button class="btn btn-light" type="button">Edit</button>
+                        @Html.ActionLink(
+                            "Edit", 
+                            "ExpensesForm",                         // controller action
+                            "Home",        // controller
+                            new { id = expense.Index },         // action parameters aka route values
+                            new { @class = "btn btn-light" })
+                        @Html.ActionLink(
+                            "Delete", 
+                            "ExpenseLineDelete",                         // controller action
+                            "Home",        // controller
+                            new { id = expense.Index },         // action parameters aka route values
+                            new { @class = "btn btn-light" })
+   
                     </td>
                 </tr>
             }
