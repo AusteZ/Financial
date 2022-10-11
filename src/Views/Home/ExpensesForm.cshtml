@@ -38,17 +38,24 @@
                 padding-left: 25% !important;
                 padding-right: 25% !important;
             }
+            .unseen{
+                display: none;
+            }
         </style>
     </head>
     <body class = "blue">
-        <!-- SIMPLE NAVBAR -->
-        
-        <div class = "card grey">
+    @if (Model.isExpense)
+    {
+        <h1>Expense</h1>
+    }else{
+        <h1>Income</h1>
+    }
+    <div class = "card grey">
             <div class = "card-body">
                 <form asp-controller = "Home" asp-action = "ExpenseLine" method = "post">
                     <div>
-                        <label class = "form-label">What</label>
-                        <input asp-for=What type ="text" class = "form-control"/>
+                        <label class = "form-label">Product</label>
+                        <input asp-for=Product type="text" class = "form-control"/>
                     </div>
                     <div>
                         <label class = "form-label">Category</label>
@@ -73,7 +80,12 @@
                     </div>
                     <div>
                         <label class = "form-label">Where</label>
-                        <input asp-for=Where class = "form-control"/>
+                        <input asp-for=Place class = "form-control"/>
+                        <input asp-for=isExpense value=@Model.isExpense type=checkbox class = "unseen"/>
+                    </div>
+                    <div>
+                        <label class = "form-label">Date</label>
+                        <input asp-for=Date type="date" class = "form-control"/>
                     </div>
                     <div class = "mt-3">
                         <button type = "submit" class = "btn btn-light">Submit</button>

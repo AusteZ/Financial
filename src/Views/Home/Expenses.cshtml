@@ -1,4 +1,4 @@
-﻿@model BaseAllMoneyModel
+﻿@model BaseMoneyListModel
 
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -41,33 +41,49 @@
             .text-bg-white{
                 color: white;
             }
+            .dimensions{
+                width:40%;
+                float: left;
+                margin:20px;
+            }
+            .margin{
+                width:20%;
+                height:100%;
+                float: left;
+            }
         </style>
     </head>
     <body class = "blue">
 
         <!-- SIMPLE NAVBAR -->
         <a asp-controller="Home" asp-action="Save" class = "btn btn-light">Save</a>
-        <a asp-controller="Home" asp-action="ExpensesForm" class = "btn btn-light">Create New</a>
+        <a asp-controller="Home" asp-action="Load" class = "btn btn-light">Load</a>
+        <a asp-controller="Home" asp-action="ExpensesForm" class = "btn btn-light">Create New Expense</a>
+        <a asp-controller="Home" asp-action="ExpensesForm" asp-route-type="1" class = "btn btn-light">Create New Income</a>
 
-        <table class="table text-bg-white">
+        <br/><br/>
+
+        <table class="table text-bg-white dimensions">
         <thead>
             <tr>
                 <th scope="col">Name</th>
                 <th scope="col">Category</th>
                 <th scope="col">Amount</th>
                 <th scope="col">Currency</th>
-                <th scope="col" colspan="2">Place</th>
+                <th scope="col">Date</th>
+                <th scope="col">Place</th>
                 <th scope="col"></th>
             </tr>
         </thead>
         <tbody>
-            @foreach(var expense in Model){
+            @foreach(var expense in Model){ if(@expense.isExpense == true){
                 <tr>
-                    <td>@expense.What</td>
+                    <td>@expense.Product</td>
                     <td>@expense.Category</td>
                     <td>@expense.Amount</td>
                     <td>@expense.Currency</td>
-                    <td>@expense.Where</td>
+                    <td>@expense.Date.ToString("yyyy-MM-dd")</td>
+                    <td>@expense.Place</td>
                     <td>
                         @Html.ActionLink(
                             "Edit", 
@@ -79,12 +95,51 @@
                             "Delete", 
                             "ExpenseLineDelete",                         // controller action
                             "Home",        // controller
-                            new { id = expense.Index },         // action parameters aka route values
+                            new { id = expense.Index , type = 0},         // action parameters aka route values
                             new { @class = "btn btn-light" })
    
                     </td>
                 </tr>
-            }
+            }}
+        </tbody>
+    </table>
+    <div class="margin"></div>
+    <table class="table text-bg-white dimensions">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Category</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Currency</th>
+                <th scope="col" colspan="2">Place</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var expense in Model){if(@expense.isExpense == false){
+                <tr>
+                    <td>@expense.Product</td>
+                    <td>@expense.Category</td>
+                    <td>@expense.Amount</td>
+                    <td>@expense.Currency</td>
+                    <td>@expense.Place</td>
+                    <td>
+                        @Html.ActionLink(
+                            "Edit", 
+                            "ExpensesForm",                         // controller action
+                            "Home",        // controller
+                            new { id = expense.Index },         // action parameters aka route values
+                            new { @class = "btn btn-light" })
+                        @Html.ActionLink(
+                            "Delete", 
+                            "ExpenseLineDelete",                         // controller action
+                            "Home",        // controller
+                            new { id = expense.Index , type = 0},         // action parameters aka route values
+                            new { @class = "btn btn-light" })
+   
+                    </td>
+                </tr>
+            }}
         </tbody>
     </table>
         

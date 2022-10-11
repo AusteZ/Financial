@@ -8,7 +8,8 @@
     ".NETCoreApp,Version=v6.0": {
       "Financial/1.0.0": {
         "dependencies": {
-          "Microsoft.VisualStudio.Web.CodeGeneration.Design": "6.0.9"
+          "Microsoft.VisualStudio.Web.CodeGeneration.Design": "6.0.9",
+          "Newtonsoft.Json": "13.0.1"
         },
         "runtime": {
           "Financial.dll": {}

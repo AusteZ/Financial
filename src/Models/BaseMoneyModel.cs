@@ -5,13 +5,15 @@ namespace Financial.Models
     [Serializable]
     public class BaseMoneyModel
     {
+        public bool isExpense { get; set; } = true;
         private static int Number = -1;
         public readonly int Index;
-        public string What { get; set; } = "Product";
+        public string Product { get; set; } = "Product";
         public string Category { get; set; } = "Type";
-        public string Where { get; set; } = "Place";
+        public string Place { get; set; }
         public decimal Amount { get; set; } = 0;
         public Currency Currency = Currency.Euro;
+        public DateTime Date { get; set; } = DateTime.Now;
         public BaseMoneyModel()
         {
             Number++;
@@ -48,21 +50,21 @@ namespace Financial.Models
         }
     */
 
-
-
-    public class BaseAllMoneyModel : IEnumerable
+    public class BaseMoneyListModel : IEnumerable
     {
-        private LinkedList<BaseMoneyModel> _list = new ();
-        public BaseAllMoneyModel()
+        private List<BaseMoneyModel> _list = new();
+
+        public BaseMoneyListModel()
         {
-            
+
         }
-        public BaseAllMoneyModel(LinkedList<BaseMoneyModel> list)
+        public BaseMoneyListModel(BaseMoneyModel[] array)
         {
-            foreach(var bmm in list)
-            {
-                _list.AddLast(bmm);
-            }
+            _list = array.ToList();
+        }
+        public BaseMoneyListModel(List<BaseMoneyModel> list)
+        {
+            _list = list;
         }
         IEnumerator IEnumerable.GetEnumerator()
         {
@@ -74,11 +76,18 @@ namespace Financial.Models
         }
         public void Add(BaseMoneyModel bmm)
         {
-            _list.AddLast(bmm);
+            _list.Add(bmm);
         }
         public void Remove(BaseMoneyModel bmm)
         {
             _list.Remove(bmm);
+        }
+        public BaseMoneyModel[] ToArray(){
+            return _list.ToArray();
+        }
+        public List<BaseMoneyModel> ToList()
+        {
+            return _list;
         }
         public BaseMoneyModel Get(int id)
         {
@@ -87,9 +96,9 @@ namespace Financial.Models
     }
     public class BaseAllMoneyEnum : IEnumerator
     {
-        private LinkedList<BaseMoneyModel> _list = new();
+        private List<BaseMoneyModel> _list = new();
         int _index = -1;
-        public BaseAllMoneyEnum(LinkedList<BaseMoneyModel> list)
+        public BaseAllMoneyEnum(List<BaseMoneyModel> list)
         {
             _list = list;
         }
@@ -118,7 +127,7 @@ namespace Financial.Models
             }
         }
 
-        public LinkedList<BaseMoneyModel> Get_list()
+        public List<BaseMoneyModel> Get_list()
         {
             return _list;
         }

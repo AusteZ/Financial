@@ -1,12 +1,14 @@
 ﻿using Financial.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace Financial.Controllers
 {
     public class HomeController : Controller
     {
-        private static BaseAllMoneyModel expenselist = new BaseAllMoneyModel();
+        private static BaseMoneyListModel expenselist = new BaseMoneyListModel();
+        private static StatisticsModel statistics = new StatisticsModel(expenselist.ToList());
 
         private readonly ILogger<HomeController> _logger;
 
@@ -17,15 +19,20 @@ namespace Financial.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            statistics.SetList(expenselist.ToList());
+            return View(statistics);
         }
-
+        public IActionResult StatisticsSettings(StatisticsModel sm)
+        {
+            statistics = sm;
+            return RedirectToAction(nameof(Index));
+        }
         public IActionResult Expenses()
         {
             return View(expenselist);
         }
         [Route("Home/ExpensesForm/{id?}")]
-        public IActionResult ExpensesForm(int id = -1)
+        public IActionResult ExpensesForm(int id = -1, int type = 0)
         {
             BaseMoneyModel expense = new BaseMoneyModel();
             if (id != -1)
@@ -35,12 +42,15 @@ namespace Financial.Controllers
                     if(exp.Index == id)
                     {
                         expense = exp;
-                        expenselist.Remove(exp);
+                        expenselist.Remove(expense);
                         break;
                     }
                 }
             }
-            
+            if (type == 1) expense.isExpense = false;
+
+
+
             return View(expense);
         }
 
@@ -56,7 +66,7 @@ namespace Financial.Controllers
             expenselist.Add(bmm);
             return RedirectToAction(nameof(Expenses));
         }
-        public IActionResult ExpenseLineDelete(int id = -1)
+        public IActionResult ExpenseLineDelete(int id = -1, int type = 0)
         {
             foreach(var exp in expenselist)
             {
@@ -70,9 +80,24 @@ namespace Financial.Controllers
         }
         public IActionResult Save()
         {
+            var a = JsonConvert.SerializeObject(expenselist.ToArray());
+            try
+            {
+                System.IO.File.WriteAllText("data.txt", a);
+            }
+            catch(Exception e)
+            {
+                var b = " d";
+            }
             return RedirectToAction(nameof(Expenses));
         }
+        public IActionResult Load()
+        {
+            var a = System.IO.File.ReadAllText("data.txt");
+            expenselist = new BaseMoneyListModel((JsonConvert.DeserializeObject<BaseMoneyModel[]>(a)).ToList());
 
+            return RedirectToAction(nameof(Expenses));
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

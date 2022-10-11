@@ -8610,7 +8610,8 @@
   },
   "projectFileDependencyGroups": {
     "net6.0": [
-      "Microsoft.VisualStudio.Web.CodeGeneration.Design >= 6.0.9"
+      "Microsoft.VisualStudio.Web.CodeGeneration.Design >= 6.0.9",
+      "Newtonsoft.Json >= 13.0.1"
     ]
   },
   "packageFolders": {
@@ -8660,6 +8661,10 @@
           "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
             "target": "Package",
             "version": "[6.0.9, )"
+          },
+          "Newtonsoft.Json": {
+            "target": "Package",
+            "version": "[13.0.1, )"
           }
         },
         "imports": [
