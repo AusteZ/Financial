@@ -7,8 +7,13 @@ namespace Financial.Controllers
 {
     public class HomeController : Controller
     {
-        private static BaseMoneyListModel expenselist = new BaseMoneyListModel();
-        private static StatisticsModel statistics = new StatisticsModel(expenselist.ToList());
+        private static BaseMoneyListModel allotheruserlist = new BaseMoneyListModel();
+        private static BaseMoneyListModel userlist = new BaseMoneyListModel();
+        private static StatisticsModel statistics = new StatisticsModel(userlist.ToList());
+
+
+        private static UserModel user = new UserModel();
+        //private string email = "";
 
         private readonly ILogger<HomeController> _logger;
 
@@ -19,7 +24,16 @@ namespace Financial.Controllers
 
         public IActionResult Index()
         {
-            statistics.SetList(expenselist.ToList());
+            if(user.Email == "" || user.Email == "no")
+            {
+                return RedirectToAction(nameof(Login));
+            }
+            if(userlist.Count() == 0)
+            {
+                Load();
+            }
+            
+            statistics.SetList(userlist.ToList());
             return View(statistics);
         }
         public IActionResult StatisticsSettings(StatisticsModel sm)
@@ -27,9 +41,18 @@ namespace Financial.Controllers
             statistics = sm;
             return RedirectToAction(nameof(Index));
         }
+        public IActionResult Login()
+        {
+            return View(new UserModel());
+        }
+        public IActionResult LoginForm(UserModel _user)
+        {
+            user = _user;
+            return RedirectToAction(nameof(Index));
+        }
         public IActionResult Expenses()
         {
-            return View(expenselist);
+            return View(userlist);
         }
         [Route("Home/ExpensesForm/{id?}")]
         public IActionResult ExpensesForm(int id = -1, int type = 0)
@@ -37,12 +60,12 @@ namespace Financial.Controllers
             BaseMoneyModel expense = new BaseMoneyModel();
             if (id != -1)
             {
-                foreach(var exp in expenselist)
+                foreach(var exp in userlist)
                 {
                     if(exp.Index == id)
                     {
                         expense = exp;
-                        expenselist.Remove(expense);
+                        userlist.Remove(expense);
                         break;
                     }
                 }
@@ -63,16 +86,17 @@ namespace Financial.Controllers
 
         public IActionResult ExpenseLine(BaseMoneyModel bmm)
         {
-            expenselist.Add(bmm);
+            bmm.UserEmail = user.Email;
+            userlist.Add(bmm);
             return RedirectToAction(nameof(Expenses));
         }
         public IActionResult ExpenseLineDelete(int id = -1, int type = 0)
         {
-            foreach(var exp in expenselist)
+            foreach(var exp in userlist)
             {
                 if(exp.Index == id)
                 {
-                    expenselist.Remove(exp);
+                    userlist.Remove(exp);
                 }
             }
 
@@ -80,7 +104,7 @@ namespace Financial.Controllers
         }
         public IActionResult Save()
         {
-            var a = JsonConvert.SerializeObject(expenselist.ToArray());
+            var a = JsonConvert.SerializeObject(userlist.ToArray());
             try
             {
                 System.IO.File.WriteAllText("data.txt", a);
@@ -94,7 +118,21 @@ namespace Financial.Controllers
         public IActionResult Load()
         {
             var a = System.IO.File.ReadAllText("data.txt");
-            expenselist = new BaseMoneyListModel((JsonConvert.DeserializeObject<BaseMoneyModel[]>(a)).ToList());
+            List<BaseMoneyModel> list = (JsonConvert.DeserializeObject<BaseMoneyModel[]>(a)).ToList();
+
+            foreach(var item in list)
+            {
+                if(item.UserEmail == user.Email)
+                {
+                    userlist.Add(item);
+                }
+                else
+                {
+                    allotheruserlist.Add(item);
+                }
+            }
+            //userlist = new BaseMoneyListModel((JsonConvert.DeserializeObject<BaseMoneyModel[]>(a)).ToList());
+            
 
             return RedirectToAction(nameof(Expenses));
         }

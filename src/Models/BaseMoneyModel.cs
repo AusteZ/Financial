@@ -1,10 +1,12 @@
 using System.Collections;
+using System.Text.RegularExpressions;
 
 namespace Financial.Models
 {
     [Serializable]
     public class BaseMoneyModel
     {
+        public string UserEmail { get; set; }
         public bool isExpense { get; set; } = true;
         private static int Number = -1;
         public readonly int Index;
@@ -25,6 +27,19 @@ namespace Financial.Models
         Euro,
         Dollar,
         Pound
+    }
+    public class UserModel
+    {
+        private string _email = "";
+        public string Email { get => _email; set
+            {
+                Regex validateEmail = new Regex("^\\S+@\\S+\\.\\S+$");
+                if (validateEmail.IsMatch(value)) _email = value;
+                else _email = "no";
+            } 
+        }
+        public string Password { get; set; } = "";
+        public UserModel(){}
     }
 
     /*
@@ -92,6 +107,10 @@ namespace Financial.Models
         public BaseMoneyModel Get(int id)
         {
             return _list.ElementAt(id);
+        }
+        public int Count()
+        {
+            return _list.Count;
         }
     }
     public class BaseAllMoneyEnum : IEnumerator
