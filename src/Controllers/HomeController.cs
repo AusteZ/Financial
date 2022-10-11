@@ -122,7 +122,8 @@ namespace Financial.Controllers
         {
             var a = System.IO.File.ReadAllText("data.txt");
             List<BaseMoneyModel> list = (JsonConvert.DeserializeObject<BaseMoneyModel[]>(a)).ToList();
-
+            allotheruserlist = new BaseMoneyListModel();
+            userlist = new BaseMoneyListModel();
             foreach(var item in list)
             {
                 if(item.UserEmail == user.Email)
