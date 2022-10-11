@@ -10,6 +10,8 @@
         public bool IsIncome { get; set; } = true;
         public string Type { get; set; } = "Total";
         public int Period { get; set; } = 2; //1 == day, 2 == month, 3 == year
+        int u = 0;
+
 
         public StatisticsModel()
         {
@@ -21,34 +23,47 @@
         }
         public void SetList(List<BaseMoneyModel> list)
         {
+            _incomelist = new List<BaseMoneyModel>();
+            _expenselist = new List<BaseMoneyModel>();
             foreach (var item in list)
             {
-                _incomelist.Clear();
-                _expenselist.Clear();
-                if (item.isExpense == false)
-                {
-                    _incomelist.Add(item);
-                }
-                else
+                
+                if (item.isExpense)
                 {
                     item.Amount = -Math.Abs(item.Amount);
                     _expenselist.Add(item);
+                }
+                else
+                {
+                    _incomelist.Add(item);
                 }
             }
         }
         public decimal Count()
         {
             var list = new List<BaseMoneyModel>();
+            if (IsIncome)  list.AddRange(_incomelist);
             if (IsExpense) list.AddRange(_expenselist);
 
-            if (IsIncome) list.AddRange(_incomelist);
+            //if (IsIncome) list.AddRange(_incomelist);
+            //if (IsExpense) list.AddRange(_expenselist);
+            //u = list.Count;
+
+
+            //if (IsIncome) list.AddRange(_incomelist);
+            List<BaseMoneyModel> indexes = new List<BaseMoneyModel>();
 
             foreach (var item in list)
             {
-                if (From.CompareTo(DateTime.Now) < 0 && From.CompareTo(item.Date) < 0) list.Remove(item);
+                if (From.CompareTo(DateTime.Now) < 0 && From.CompareTo(item.Date) > 0) indexes.Add(item);
             }
+            foreach(var item in indexes)
+            {
+                list.Remove(item);
+            }
+            u = list.Count;
 
-            
+
             if (Type == "Average") return TotalAverage(list);
             else return TotalSum(list);
 
@@ -57,52 +72,46 @@
         {
             decimal sum = 0;
 
-
             foreach (var item in list)
             {
                 sum += item.Amount;
             }
 
+
             return sum;
         }
         public decimal TotalAverage(List<BaseMoneyModel> list)
         {
-            decimal sum = 0;
+            decimal sol = 0;
             int count = 0;
-            foreach(var item in list)
+            //int i = 0;
+            list.Sort((x, y) => x.Date.CompareTo(y.Date));
+            for(int i = 0; i < list.Count; )
             {
-                ++count;
-                sum += item.Amount;
-                foreach(var item2 in list)
+                count++;
+                for (int j = i + 1; j < list.Count; j++)
                 {
-                    switch (Period)
-                    {
-                        case 1:
-                            if (item.Date.Day == item2.Date.Day)
+                    if (list[i].Date.Year == list[j].Date.Year) { 
+                        if (Period == 3)
+                        {
+                            continue;
+                        }
+                        else if (list[i].Date.Month == list[j].Date.Month)
+                        {
+                            if (Period == 2 || (list[i].Date.Day == list[j].Date.Day && Period == 1))
                             {
-                                sum += item2.Amount;
-                                list.Remove(item2);
+                                continue;
                             }
-                            break;
-                        case 2:
-                            if (item.Date.Month == item2.Date.Month)
-                            {
-                                sum += item2.Amount;
-                                list.Remove(item2);
-                            }
-                            break;
-                        case 3:
-                            if (item.Date.Year == item2.Date.Year)
-                            {
-                                sum += item2.Amount;
-                                list.Remove(item2);
-                            }
-                            break;
+                        }
                     }
+                    i = j;
+                    break;
                 }
             }
+            sol = count == 0 ? 0 : TotalSum(list) / count;
             
-            return sum/count;
+            return count;
+            //return u;
         }
     }
 }

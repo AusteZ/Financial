@@ -111,7 +111,8 @@
                 <th scope="col">Category</th>
                 <th scope="col">Amount</th>
                 <th scope="col">Currency</th>
-                <th scope="col" colspan="2">Place</th>
+                <th scope="col">Date</th>
+                <th scope="col">Place</th>
                 <th scope="col"></th>
             </tr>
         </thead>
@@ -122,6 +123,7 @@
                     <td>@expense.Category</td>
                     <td>@expense.Amount</td>
                     <td>@expense.Currency</td>
+                    <td>@expense.Date.ToString("yyyy-MM-dd")</td>
                     <td>@expense.Place</td>
                     <td>
                         @Html.ActionLink(
