@@ -140,6 +140,7 @@ namespace Financial.Controllers
         public IActionResult Logout()
         {
             user.Email = "";
+            user.PAssword = "";
             return RedirectToAction(nameof(Index));
         }
 
