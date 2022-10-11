@@ -104,7 +104,10 @@ namespace Financial.Controllers
         }
         public IActionResult Save()
         {
-            var a = JsonConvert.SerializeObject(userlist.ToArray());
+            List<BaseMoneyModel> list = new List<BaseMoneyModel>();
+            if (userlist.Count() > 0) list.AddRange(userlist.ToList());
+            if (allotheruserlist.Count() > 0) list.AddRange(allotheruserlist.ToList());
+            var a = JsonConvert.SerializeObject(list.ToArray());
             try
             {
                 System.IO.File.WriteAllText("data.txt", a);
@@ -140,7 +143,10 @@ namespace Financial.Controllers
         public IActionResult Logout()
         {
             user.Email = "";
-            user.PAssword = "";
+            user.Password = "";
+            statistics = new StatisticsModel(userlist.ToList());
+            userlist = new BaseMoneyListModel();
+            allotheruserlist = new BaseMoneyListModel();
             return RedirectToAction(nameof(Index));
         }
 
