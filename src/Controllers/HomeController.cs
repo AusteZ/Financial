@@ -24,7 +24,7 @@ namespace Financial.Controllers
 
         public IActionResult Index()
         {
-            if(user.Email == "" || user.Email == "no")
+            if(user.Email == "" || user.Email == "no" || user.Password == "" || user.Password == "no")
             {
                 return RedirectToAction(nameof(Login));
             }
@@ -149,6 +149,10 @@ namespace Financial.Controllers
             userlist = new BaseMoneyListModel();
             allotheruserlist = new BaseMoneyListModel();
             return RedirectToAction(nameof(Index));
+        }
+        public IActionResult Register()
+        {
+            return View();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

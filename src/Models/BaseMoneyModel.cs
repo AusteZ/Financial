@@ -31,14 +31,24 @@ namespace Financial.Models
     public class UserModel
     {
         private string _email = "";
+        private string _password = "";
         public string Email { get => _email; set
             {
                 Regex validateEmail = new Regex("^\\S+@\\S+\\.\\S+$");
-                if (validateEmail.IsMatch(value)) _email = value;
+                if (value != "" && validateEmail.IsMatch(value)) _email = value;
                 else _email = "no";
             } 
         }
-        public string Password { get; set; } = "";
+        public string Password
+        {
+            get => _password; set
+            {
+                Regex validatePassword = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$");
+                if (value != "" && validatePassword.IsMatch(value)) _password = value;
+                else _password = "no";
+                
+            }
+        }
         public UserModel(){}
     }
 
