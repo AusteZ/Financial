@@ -5,8 +5,53 @@
 *@
 @{
 }
+<<<<<<< HEAD
+<style>
+    * {
+        box-sizing: border-box
+    }
+
+    .container {
+        padding: 16px;
+    }
+
+    hr {
+        border: 1px solid #f1f1f1;
+        margin-bottom: 25px;
+    }
+
+    .loginbtn {
+        background-color: #123456;
+        color: white;
+        padding: 16px 20px;
+        margin: 8px 0;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        opacity: 0.9;
+    }
+
+        .registerbtn:hover {
+            opacity: 1;
+        }
+
+    a {
+        color: dodgerblue;
+    }
+
+    .register {
+        background-color: #f1f1f1;
+        text-align: center;
+    }
+</style>
+
+<hr />
+<div class="container">
+    <h4>Please login :) </h4>
+=======
 
 <div class = "card grey">
+>>>>>>> parent of 9bafae6 (Login)
             <div class = "card-body">
                 <form asp-controller = "Home" asp-action = "LoginForm" method = "post">
                     <div>
@@ -19,8 +64,23 @@
                         </div>
                     }
                     <div class = "mt-3">
+<<<<<<< HEAD
+                        <button type = "submit" class = "loginbtn">Login</button>
+                    </div>
+                    @if (@Model.Password == "no")
+                    {
+                        <div class="text-errror">
+                            Please put in a valid password!
+                        </div>
+                    }
+
+            <div class="container register">
+                <a asp-controller = "Home" asp-action="Register">New member? Sign up</a>
+            </div>
+=======
                         <button type = "submit" class = "btn btn-light">Submit</button>
                     </div>
+>>>>>>> parent of 9bafae6 (Login)
                 </form>
             </div>
         </div>

@@ -144,10 +144,24 @@ namespace Financial.Controllers
         public IActionResult Logout()
         {
             user.Email = "";
+<<<<<<< HEAD
+<<<<<<< HEAD
+            user.Password = "";
+//<<<<<<< HEAD
+///=======
+            statistics = new StatisticsModel(userlist.ToList());
+            userlist = new BaseMoneyListModel();
+            allotheruserlist = new BaseMoneyListModel();
+//>>>>>>> 046fa3cd7028e87120ed008e66927aae3d08f0f9
+=======
+            user.PAssword = "";
+>>>>>>> parent of 9bafae6 (Login)
+=======
             user.Password = "";
             statistics = new StatisticsModel(userlist.ToList());
             userlist = new BaseMoneyListModel();
             allotheruserlist = new BaseMoneyListModel();
+>>>>>>> 046fa3cd7028e87120ed008e66927aae3d08f0f9
             return RedirectToAction(nameof(Index));
         }
 
