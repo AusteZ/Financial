@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using System.Collections;
 
 namespace Financial.Controllers
 {
@@ -13,7 +14,6 @@ namespace Financial.Controllers
 
 
         private static UserModel user = new UserModel();
-        //private string email = "";
 
         private readonly ILogger<HomeController> _logger;
 
@@ -30,7 +30,10 @@ namespace Financial.Controllers
             }
             if(userlist.Count() == 0)
             {
-                Load();
+                List<BaseMoneyModel> foruser, forothers;
+                Load<BaseMoneyModel>("data.txt", out foruser, out forothers);
+                userlist = new BaseMoneyListModel(foruser);
+                allotheruserlist = new BaseMoneyListModel(forothers);
             }
             
             statistics.SetList(userlist.ToList());
@@ -48,6 +51,10 @@ namespace Financial.Controllers
         public IActionResult LoginForm(UserModel _user)
         {
             user = _user;
+            List<UserModel> foruser;
+            Load<UserModel>("users.txt", out foruser, out _);
+            if (foruser.Count != 1)
+                user = new UserModel();
             return RedirectToAction(nameof(Index));
         }
         public IActionResult Expenses()
@@ -86,7 +93,7 @@ namespace Financial.Controllers
 
         public IActionResult ExpenseLine(BaseMoneyModel bmm)
         {
-            bmm.UserEmail = user.Email;
+            bmm.Email = user.Email;
             userlist.Add(bmm);
             return RedirectToAction(nameof(Expenses));
         }
@@ -118,27 +125,31 @@ namespace Financial.Controllers
             }
             return RedirectToAction(nameof(Expenses));
         }
-        public IActionResult Load()
+        public void Load<T>(string filename, out List<T> foruser, out List<T> forothers) where T : LinkingEmail
         {
-            var a = System.IO.File.ReadAllText("data.txt");
-            List<BaseMoneyModel> list = (JsonConvert.DeserializeObject<BaseMoneyModel[]>(a)).ToList();
-            allotheruserlist = new BaseMoneyListModel();
-            userlist = new BaseMoneyListModel();
-            foreach(var item in list)
+            foruser = new List<T>();
+            forothers = new List<T>();
+            IEnumerable list;
+            if (System.IO.File.Exists(filename) && (new FileInfo(filename)).Length != 0)
             {
-                if(item.UserEmail == user.Email)
+                var filestream = System.IO.File.ReadAllText(filename);
+                list = (JsonConvert.DeserializeObject<T[]>(filestream)).ToList();
+                foreach (T item in list)
                 {
-                    userlist.Add(item);
-                }
-                else
-                {
-                    allotheruserlist.Add(item);
+                    if (item.Email == user.Email)
+                    {
+                        foruser.Add(item);
+                    }
+                    else
+                    {
+                        forothers.Add(item);
+                    }
                 }
             }
-            //userlist = new BaseMoneyListModel((JsonConvert.DeserializeObject<BaseMoneyModel[]>(a)).ToList());
-            
-
-            return RedirectToAction(nameof(Expenses));
+            else
+            {
+                (System.IO.File.Create(filename)).Close();
+            }
         }
 
         public IActionResult Logout()
@@ -153,6 +164,25 @@ namespace Financial.Controllers
         public IActionResult Register()
         {
             return View();
+        }
+        public IActionResult RegisterForm(UserModel um)
+        {
+            List<UserModel> foruser, forall;
+            Load<UserModel>("users.txt", out foruser, out forall);
+            if (foruser.Count == 0) {
+                user = um;
+                if (user.Email != "" && user.Password != "")
+                {
+                    forall.Add(user);
+                    System.IO.File.WriteAllText("users.txt", JsonConvert.SerializeObject(forall));
+                }
+                else
+                {
+                    return RedirectToAction(nameof(Register));
+                }
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

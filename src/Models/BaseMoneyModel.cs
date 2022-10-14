@@ -3,10 +3,19 @@ using System.Text.RegularExpressions;
 
 namespace Financial.Models
 {
-    [Serializable]
-    public class BaseMoneyModel
+    public class LinkingEmail
     {
-        public string UserEmail { get; set; }
+        protected string _email = "";
+        public virtual string Email
+        {
+            get => _email;
+            set => _email = value;
+        }
+    }
+
+    [Serializable]
+    public class BaseMoneyModel : LinkingEmail
+    {
         public bool isExpense { get; set; } = true;
         private static int Number = -1;
         public readonly int Index;
@@ -28,15 +37,15 @@ namespace Financial.Models
         Dollar,
         Pound
     }
-    public class UserModel
+    [Serializable]
+    public class UserModel : LinkingEmail
     {
-        private string _email = "";
         private string _password = "";
-        public string Email { get => _email; set
+        public override string Email { get => _email; set
             {
                 Regex validateEmail = new Regex("^\\S+@\\S+\\.\\S+$");
                 if (value != "" && validateEmail.IsMatch(value)) _email = value;
-                else _email = "no";
+                else _email = "";
             } 
         }
         public string Password
@@ -45,7 +54,7 @@ namespace Financial.Models
             {
                 Regex validatePassword = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$");
                 if (value != "" && validatePassword.IsMatch(value)) _password = value;
-                else _password = "no";
+                else _password = "";
                 
             }
         }
