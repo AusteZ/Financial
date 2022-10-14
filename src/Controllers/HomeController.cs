@@ -53,7 +53,7 @@ namespace Financial.Controllers
             user = _user;
             List<UserModel> foruser;
             Load<UserModel>("users.txt", out foruser, out _);
-            if (foruser.Count != 1)
+            if (foruser.Count != 1 || foruser[0].Password != user.Password)
                 user = new UserModel();
             return RedirectToAction(nameof(Index));
         }
@@ -153,7 +153,7 @@ namespace Financial.Controllers
         {
             var _list = userlist.ToList();
             var orderByResult = from s in _list
-                                orderby s.Amount
+                                orderby s.Amount descending
                                 select s;
             userlist = new BaseMoneyListModel(orderByResult);
             return RedirectToAction(nameof(Expenses));
