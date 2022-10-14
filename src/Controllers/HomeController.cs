@@ -149,7 +149,15 @@ namespace Financial.Controllers
                 (System.IO.File.Create(filename)).Close();
             }
         }
-
+        public IActionResult Sort()
+        {
+            var _list = userlist.ToList();
+            var orderByResult = from s in _list
+                                orderby s.Amount
+                                select s;
+            userlist = new BaseMoneyListModel(orderByResult);
+            return RedirectToAction(nameof(Expenses));
+        }
         public IActionResult Logout()
         {
             user.Email = "";

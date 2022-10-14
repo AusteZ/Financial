@@ -96,9 +96,11 @@ namespace Financial.Models
         {
             _list = array.ToList();
         }
-        public BaseMoneyListModel(List<BaseMoneyModel> list)
+        public BaseMoneyListModel(IEnumerable<BaseMoneyModel> list)
         {
-            _list = list;
+            _list.Clear();
+            if(list.Any())
+                _list.AddRange(list);
         }
         IEnumerator IEnumerable.GetEnumerator()
         {
