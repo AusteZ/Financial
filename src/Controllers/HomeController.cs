@@ -78,9 +78,6 @@ namespace Financial.Controllers
                 }
             }
             if (type == 1) expense.isExpense = false;
-
-
-
             return View(expense);
         }
 
@@ -94,6 +91,7 @@ namespace Financial.Controllers
         public IActionResult ExpenseLine(BaseMoneyModel bmm)
         {
             bmm.Email = user.Email;
+            if (bmm.isExpense) bmm.Amount = -Math.Abs(bmm.Amount);
             userlist.Add(bmm);
             return RedirectToAction(nameof(Expenses));
         }
