@@ -8,10 +8,7 @@ namespace Financial.Controllers
 {
     public class HomeController : Controller
     {
-        private static BaseMoneyListModel allotheruserlist = new BaseMoneyListModel();
-        private static BaseMoneyListModel userlist = new BaseMoneyListModel();
-        private static StatisticsModel statistics = new StatisticsModel(userlist.ToList());
-
+        private static FinanceModel wholeProgram = new FinanceModel();
 
         private static UserModel user = new UserModel();
 
@@ -24,24 +21,30 @@ namespace Financial.Controllers
 
         public IActionResult Index()
         {
-            if(user.Email == "" || user.Email == "no" || user.Password == "" || user.Password == "no")
+            if(wholeProgram.User.Email == "" || wholeProgram.User.Password == "")
             {
                 return RedirectToAction(nameof(Login));
             }
-            if(userlist.Count() == 0)
+            if(wholeProgram.UserFinanceList.Count() == 0)
             {
                 List<BaseMoneyModel> foruser, forothers;
                 Load<BaseMoneyModel>("data.txt", out foruser, out forothers);
-                userlist = new BaseMoneyListModel(foruser);
-                allotheruserlist = new BaseMoneyListModel(forothers);
+                wholeProgram.UserFinanceList = new BaseMoneyListModel(foruser);
+                wholeProgram.AllOtherUsersFinanceList = new BaseMoneyListModel(forothers);
             }
             
-            statistics.SetList(userlist.ToList());
-            return View(statistics);
+            wholeProgram.Statistics.SetList(wholeProgram.UserFinanceList.ToList());
+            return View(wholeProgram.Statistics);
+
+            //return RedirectToAction(nameof(Index1));
+        }
+        public IActionResult Index1()
+        {
+            return View(wholeProgram);
         }
         public IActionResult StatisticsSettings(StatisticsModel sm)
         {
-            statistics = sm;
+            wholeProgram.Statistics = sm;
             return RedirectToAction(nameof(Index));
         }
         public IActionResult Login()
@@ -50,16 +53,16 @@ namespace Financial.Controllers
         }
         public IActionResult LoginForm(UserModel _user)
         {
-            user = _user;
+            wholeProgram.User = _user;
             List<UserModel> foruser;
             Load<UserModel>("users.txt", out foruser, out _);
-            if (foruser.Count != 1 || foruser[0].Password != user.Password)
-                user = new UserModel();
+            if (foruser.Count != 1 || foruser[0].Password != wholeProgram.User.Password)
+                wholeProgram.User = new UserModel();
             return RedirectToAction(nameof(Index));
         }
         public IActionResult Expenses()
         {
-            return View(userlist);
+            return View(wholeProgram.UserFinanceList);
         }
         [Route("Home/ExpensesForm/{id?}")]
         public IActionResult ExpensesForm(int id = -1, int type = 0)
@@ -67,12 +70,12 @@ namespace Financial.Controllers
             BaseMoneyModel expense = new BaseMoneyModel();
             if (id != -1)
             {
-                foreach(var exp in userlist)
+                foreach(var exp in wholeProgram.UserFinanceList)
                 {
                     if(exp.Index == id)
                     {
                         expense = exp;
-                        userlist.Remove(expense);
+                        wholeProgram.UserFinanceList.Remove(expense);
                         break;
                     }
                 }
@@ -90,18 +93,18 @@ namespace Financial.Controllers
 
         public IActionResult ExpenseLine(BaseMoneyModel bmm)
         {
-            bmm.Email = user.Email;
+            bmm.Email = wholeProgram.User.Email;
             if (bmm.isExpense) bmm.Amount = -Math.Abs(bmm.Amount);
-            userlist.Add(bmm);
+            wholeProgram.UserFinanceList.Add(bmm);
             return RedirectToAction(nameof(Expenses));
         }
         public IActionResult ExpenseLineDelete(int id = -1, int type = 0)
         {
-            foreach(var exp in userlist)
+            foreach(var exp in wholeProgram.UserFinanceList)
             {
                 if(exp.Index == id)
                 {
-                    userlist.Remove(exp);
+                    wholeProgram.UserFinanceList.Remove(exp);
                 }
             }
 
@@ -110,8 +113,8 @@ namespace Financial.Controllers
         public IActionResult Save()
         {
             List<BaseMoneyModel> list = new List<BaseMoneyModel>();
-            if (userlist.Count() > 0) list.AddRange(userlist.ToList());
-            if (allotheruserlist.Count() > 0) list.AddRange(allotheruserlist.ToList());
+            if (wholeProgram.UserFinanceList.Count() > 0) list.AddRange(wholeProgram.UserFinanceList.ToList());
+            if (wholeProgram.AllOtherUsersFinanceList.Count() > 0) list.AddRange(wholeProgram.AllOtherUsersFinanceList.ToList());
             var a = JsonConvert.SerializeObject(list.ToArray());
             try
             {
@@ -134,7 +137,7 @@ namespace Financial.Controllers
                 list = (JsonConvert.DeserializeObject<T[]>(filestream)).ToList();
                 foreach (T item in list)
                 {
-                    if (item.Email == user.Email)
+                    if (item.Email == wholeProgram.User.Email)
                     {
                         foruser.Add(item);
                     }
@@ -151,20 +154,16 @@ namespace Financial.Controllers
         }
         public IActionResult Sort()
         {
-            var _list = userlist.ToList();
+            var _list = wholeProgram.UserFinanceList.ToList();
             var orderByResult = from s in _list
                                 orderby s.Amount descending
                                 select s;
-            userlist = new BaseMoneyListModel(orderByResult);
+            wholeProgram.UserFinanceList = new BaseMoneyListModel(orderByResult);
             return RedirectToAction(nameof(Expenses));
         }
         public IActionResult Logout()
         {
-            user.Email = "";
-            user.Password = "";
-            statistics = new StatisticsModel(userlist.ToList());
-            userlist = new BaseMoneyListModel();
-            allotheruserlist = new BaseMoneyListModel();
+            wholeProgram = new FinanceModel();
             return RedirectToAction(nameof(Index));
         }
         public IActionResult Register()
@@ -176,10 +175,10 @@ namespace Financial.Controllers
             List<UserModel> foruser, forall;
             Load<UserModel>("users.txt", out foruser, out forall);
             if (foruser.Count == 0) {
-                user = um;
-                if (user.Email != "" && user.Password != "")
+                wholeProgram.User = um;
+                if (wholeProgram.User.Email != "" && wholeProgram.User.Password != "")
                 {
-                    forall.Add(user);
+                    forall.Add(wholeProgram.User);
                     System.IO.File.WriteAllText("users.txt", JsonConvert.SerializeObject(forall));
                 }
                 else
