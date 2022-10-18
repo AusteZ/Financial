@@ -41,6 +41,7 @@ namespace Financial.Models
     public class UserModel : LinkingEmail
     {
         private string _password = "";
+        private string _confirmPassword = "";
         public override string Email { get => _email; set
             {
                 Regex validateEmail = new Regex("^\\S+@\\S+\\.\\S+$");
@@ -56,6 +57,17 @@ namespace Financial.Models
                 if (value != "" && validatePassword.IsMatch(value)) _password = value;
                 else _password = "";
                 
+            }
+        }
+
+        public string ConfirmPassword
+        {
+            get => _confirmPassword; set
+            {
+                Regex validatePassword = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$");
+                if (value != "" && validatePassword.IsMatch(value)) _confirmPassword = value;
+                else _confirmPassword = "";
+
             }
         }
         public UserModel(){}

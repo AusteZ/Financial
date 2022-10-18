@@ -21,7 +21,7 @@ namespace Financial.Controllers
 
         public IActionResult Index()
         {
-            if(wholeProgram.User.Email == "" || wholeProgram.User.Password == "")
+            if (wholeProgram.User.Email == "" || wholeProgram.User.Password == "" || wholeProgram.User.ConfirmPassword != "" || wholeProgram.User.Password == wholeProgram.User.ConfirmPassword)
             {
                 return RedirectToAction(nameof(Login));
             }
@@ -200,7 +200,7 @@ namespace Financial.Controllers
             Load<UserModel>("users.txt", out foruser, out forall);
             if (foruser.Count == 0) {
                 wholeProgram.User = um;
-                if (wholeProgram.User.Email != "" && wholeProgram.User.Password != "")
+                if (wholeProgram.User.ConfirmPassword == wholeProgram.User.Password)
                 {
                     forall.Add(wholeProgram.User);
                     System.IO.File.WriteAllText("users.txt", JsonConvert.SerializeObject(forall));
