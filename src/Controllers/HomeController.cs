@@ -10,7 +10,7 @@ namespace Financial.Controllers
     {
         private static FinanceModel wholeProgram = new FinanceModel();
 
-        private static UserModel user = new UserModel();
+        //private static UserModel user = new UserModel();
 
         private readonly ILogger<HomeController> _logger;
 
@@ -34,9 +34,9 @@ namespace Financial.Controllers
             }
             
             wholeProgram.Statistics.SetList(wholeProgram.UserFinanceList.ToList());
-            return View(wholeProgram.Statistics);
+            //return View(wholeProgram.Statistics);
 
-            //return RedirectToAction(nameof(Index1));
+            return RedirectToAction(nameof(Index1));
         }
         public IActionResult Index1()
         {
@@ -152,14 +152,38 @@ namespace Financial.Controllers
                 (System.IO.File.Create(filename)).Close();
             }
         }
-        public IActionResult Sort()
+        public IActionResult Sort(string type)
         {
+            wholeProgram.Settings.Sort = type;
             var _list = wholeProgram.UserFinanceList.ToList();
-            var orderByResult = from s in _list
+            var orderByResult = from s in _list select s;
+            if (wholeProgram.Settings.Sort == "Name")
+            {
+                orderByResult = from s in _list
+                                orderby s.Product descending
+                                select s;
+            }
+            else if(wholeProgram.Settings.Sort == "Place")
+            {
+                orderByResult = from s in _list
+                                orderby s.Place descending
+                                select s;
+            }
+            else if (wholeProgram.Settings.Sort == "Amount")
+            {
+                orderByResult = from s in _list
                                 orderby s.Amount descending
                                 select s;
+            }
+            else if (wholeProgram.Settings.Sort == "Date")
+            {
+                orderByResult = from s in _list
+                                orderby s.Date descending
+                                select s;
+            }
             wholeProgram.UserFinanceList = new BaseMoneyListModel(orderByResult);
-            return RedirectToAction(nameof(Expenses));
+            //return RedirectToAction(nameof(Expenses));
+            return RedirectToAction(nameof(Index1));
         }
         public IActionResult Logout()
         {
