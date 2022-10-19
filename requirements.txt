@@ -1,0 +1,10 @@
+!	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!			| 			Creating and using your own class, STRUCT and enum; - category Agneta
+!	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!			| 			Property usage in STRUCT and class;
++	id and type in HomeController				| Named and optional argument usage;
+!	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!			| 			Extension method usage; - IEnumerable edit/remove method Auste
++	users.txt and data.txt					| Reading from file;
++	Load method							| Generic type usage;
++	Regex usage; 						| email + password
++	Converting IEnumerable to BaseMoneyListModel }	| Widening and narrowing type conversions;
++	Sorting							| LINQ to Objects usage (methods and queries); (sorting and filtering)
++	IEnumerable							| Implementing at least one of the standard .NET interfaces (IEnumerable, IComparable, IComparer, IEquatable, IEnumerator, etc.)
