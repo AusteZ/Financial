@@ -61,6 +61,8 @@ namespace Financial.Models
         public UserModel(){}
     }
 
+
+
     /*
         public struct Category
         {

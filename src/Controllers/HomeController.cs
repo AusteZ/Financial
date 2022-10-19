@@ -83,12 +83,6 @@ namespace Financial.Controllers
             if (type == 1) expense.isExpense = false;
             return View(expense);
         }
-
-        public IActionResult CategoriesForm(BaseMoneyModel category = null)
-        {
-            category = category ?? new BaseMoneyModel();
-            return View(category);
-        }
         
 
         public IActionResult ExpenseLine(BaseMoneyModel bmm)
@@ -185,6 +179,62 @@ namespace Financial.Controllers
             //return RedirectToAction(nameof(Expenses));
             return RedirectToAction(nameof(Index1));
         }
+
+        public IActionResult FilterForm()
+        {
+            return View();
+        }
+
+        public IActionResult ShowFilteredExpenses(string FilterPhrase)
+        {
+            var _list = wholeProgram.UserFinanceList.ToList();
+            var orderByResult = from s in _list
+                                where s.Category == FilterPhrase
+                                where s.isExpense == true
+                                select s;
+
+            return View(new BaseMoneyListModel(orderByResult));
+        }
+
+        public IActionResult Categories()
+        {
+            int BiggestExpense = 0;
+            var CategoriesCount = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
+            var categories = new List<string>
+            {
+                "Housing", 
+                "Transportation", 
+                "Food", 
+                "Utilities",
+                "Healthcare", 
+                "Saving&Investing", 
+                "Clothing", 
+                "Entertainment"
+            };
+
+            for (int i = 0; i < 8; i++)
+            {
+                foreach (var expense in wholeProgram.UserFinanceList)
+                {
+                    if(expense.Category == categories[i])
+                    {
+                        CategoriesCount[i] = (int)(CategoriesCount[i] + (-1)*(expense.Amount));
+                        if (CategoriesCount[i] > BiggestExpense)
+                        {
+                            BiggestExpense = CategoriesCount[i];
+                        }
+                    }
+                }
+            }
+
+            ViewBag.Categories = categories;
+            ViewBag.CategoriesCount = CategoriesCount;
+            ViewBag.BiggestExpense = BiggestExpense;
+
+            return View();
+        }
+        
+
         public IActionResult Logout()
         {
             wholeProgram = new FinanceModel();

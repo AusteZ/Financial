@@ -1,0 +1,130 @@
+﻿@model BaseMoneyListModel
+
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+<html>
+    <head>
+        <!-- CSS only -->
+        <style>
+            .blue {
+                background-color: #123456 !important;
+            }
+
+            .grey {
+                background-color: #b5b5b5 !important;
+            }
+
+            .greyblue {
+                background-color: #6789AB !important;
+            }
+
+            .rectangle {
+                position: absolute;
+                width: 100%;
+                height: 65%;
+            }
+
+            .overlay {
+                z-index: 100;
+                height: 40%;
+                width: 100%;
+            }
+
+            .card-size {
+                height: 300px;
+                width: 10%;
+            }
+
+            .card {
+                position: relative;
+            }
+
+            .padding-both-sides {
+                padding-left: 25% !important;
+                padding-right: 25% !important;
+            }
+
+            .text-bg-white {
+                color: white;
+            }
+
+            .dimensions {
+                width: 40%;
+                float: left;
+                margin: 20px;
+            }
+
+            .margin {
+                width: 20%;
+                height: 100%;
+                float: left;
+            }
+
+            .box { 
+                align-content: center;
+                background-color: #f1f1f1;
+                text-align: center;
+                padding: 16px;
+            }
+
+
+        </style>
+    </head>
+    <body class="blue">
+
+        <!-- SIMPLE NAVBAR -->
+       
+        <br />
+        <br />
+
+        <table class="table text-bg-white">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Currency</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Place</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var expense in Model)
+                {
+                    <tr >
+                        <td>@expense.Product</td>
+                        <td>@expense.Category</td>
+                        <td>@expense.Amount</td>
+                        <td>@expense.Currency</td>
+                        <td>@expense.Date.ToString("yyyy-MM-dd")</td>
+                        <td>@expense.Place</td>
+                        <td>
+                            @Html.ActionLink(
+                    "Edit",
+                    "ExpensesForm",                         // controller action
+                    "Home",        // controller
+                    new { id = expense.Index },         // action parameters aka route values
+                    new { @class = "btn btn-light" })
+                            @Html.ActionLink(
+                    "Delete",
+                    "ExpenseLineDelete",                         // controller action
+                    "Home",        // controller
+                    new { id = expense.Index , type = 0},         // action parameters aka route values
+                    new { @class = "btn btn-light" })
+
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="margin"></div>
+
+    <div class="box">
+        <a asp-controller="Home" asp-action="Expenses">Back to Finances</a>
+    </div>
+
+    </body>
+</html>

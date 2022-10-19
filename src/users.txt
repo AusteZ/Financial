@@ -1,1 +1,5 @@
+<<<<<<< HEAD
+[{"Email":"hihihi@gmail.com","Password":"Testinimas123@"},{"Email":"ferefre@rere.com","Password":"Rfoivhv@123"},{"Email":"hello@gmail.com","Password":"Slaptazodis123@"}]
+=======
 [{"Email":"hihihi@gmail.com","Password":"Testinimas123@"},{"Email":"ferefre@rere.com","Password":"Rfoivhv@123"},{"Email":"alio@gmail.com","Password":"alioAlio123!"}]
+>>>>>>> d6a202c5c732288dd9a44e8a4e60e1ee15d6d9bc

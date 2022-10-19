@@ -8939,23 +8939,39 @@
     ]
   },
   "packageFolders": {
+<<<<<<< HEAD
+    "C:\\Users\\agnet\\.nuget\\packages\\": {},
+=======
     "C:\\Users\\greta\\.nuget\\packages\\": {},
+>>>>>>> d6a202c5c732288dd9a44e8a4e60e1ee15d6d9bc
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
+<<<<<<< HEAD
+      "projectUniqueName": "C:\\Users\\agnet\\Source\\Repos\\Financialx\\src\\Financial.csproj",
+      "projectName": "Financial",
+      "projectPath": "C:\\Users\\agnet\\Source\\Repos\\Financialx\\src\\Financial.csproj",
+      "packagesPath": "C:\\Users\\agnet\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\agnet\\Source\\Repos\\Financialx\\src\\obj\\",
+=======
       "projectUniqueName": "C:\\Users\\greta\\OneDrive\\Desktop\\financess\\src\\Financial.csproj",
       "projectName": "Financial",
       "projectPath": "C:\\Users\\greta\\OneDrive\\Desktop\\financess\\src\\Financial.csproj",
       "packagesPath": "C:\\Users\\greta\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\greta\\OneDrive\\Desktop\\financess\\src\\obj\\",
+>>>>>>> d6a202c5c732288dd9a44e8a4e60e1ee15d6d9bc
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
+<<<<<<< HEAD
+        "C:\\Users\\agnet\\AppData\\Roaming\\NuGet\\NuGet.Config",
+=======
         "C:\\Users\\greta\\AppData\\Roaming\\NuGet\\NuGet.Config",
+>>>>>>> d6a202c5c732288dd9a44e8a4e60e1ee15d6d9bc
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
