@@ -65,7 +65,15 @@
         <label><b>Confirm Password</b></label>
         <input asp-for=ConfirmPassword type="password" placeholder="Confirm Password" required>
         <hr>
+        @if (SettingsModel.ErrorFlag == true)
+        {
+            <div>
+                <p class="text-danger">The email has to have an @@ symbol and a dot (.)</p>
+                <br/>
+                <p class="text-danger">The password must be at least 8 characters long, have an upper and a lover case character, a special character and a number.</p>
 
+            </div>
+        }
         <button type="submit" class="registerbtn">Register</button>
     </div>
 

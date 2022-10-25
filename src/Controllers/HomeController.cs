@@ -3,12 +3,15 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using System.Collections;
+using NuGet.Packaging.Signing;
 
 namespace Financial.Controllers
 {
     public class HomeController : Controller
     {
         private static FinanceModel wholeProgram = new FinanceModel();
+        private static SettingsModel Settings = new SettingsModel();
+        
 
         //private static UserModel user = new UserModel();
 
@@ -21,26 +24,23 @@ namespace Financial.Controllers
 
         public IActionResult Index()
         {
-            if (wholeProgram.User.Email == "" || wholeProgram.User.Password == "" || wholeProgram.User.ConfirmPassword != "" || wholeProgram.User.Password == wholeProgram.User.ConfirmPassword)
+            if (wholeProgram.User.Email == "" || wholeProgram.User.Password == "")
             {
                 return RedirectToAction(nameof(Login));
             }
             if(wholeProgram.UserFinanceList.Count() == 0)
             {
                 List<BaseMoneyModel> foruser, forothers;
-                Load<BaseMoneyModel>("data.txt", out foruser, out forothers);
-                wholeProgram.UserFinanceList = new BaseMoneyListModel(foruser);
-                wholeProgram.AllOtherUsersFinanceList = new BaseMoneyListModel(forothers);
+                Load<BaseMoneyModel>("data.json", out foruser, out forothers);
+                wholeProgram.UserFinanceList = foruser;
+                wholeProgram.AllOtherUsersFinanceList = forothers;
+                Settings.PresentList = wholeProgram.UserFinanceList;
             }
             
             wholeProgram.Statistics.SetList(wholeProgram.UserFinanceList.ToList());
-            //return View(wholeProgram.Statistics);
+            SettingsModel.ErrorFlag = false;
 
-            return RedirectToAction(nameof(Index1));
-        }
-        public IActionResult Index1()
-        {
-            return View(wholeProgram);
+            return View(Settings);
         }
         public IActionResult StatisticsSettings(StatisticsModel sm)
         {
@@ -55,9 +55,13 @@ namespace Financial.Controllers
         {
             wholeProgram.User = _user;
             List<UserModel> foruser;
-            Load<UserModel>("users.txt", out foruser, out _);
+            Load<UserModel>("users.json", out foruser, out _);
             if (foruser.Count != 1 || foruser[0].Password != wholeProgram.User.Password)
+            {
                 wholeProgram.User = new UserModel();
+                SettingsModel.ErrorFlag = true;
+            }
+                
             return RedirectToAction(nameof(Index));
         }
         public IActionResult Expenses()
@@ -89,14 +93,12 @@ namespace Financial.Controllers
             category = category ?? new BaseMoneyModel();
             return View(category);
         }
-        
-
         public IActionResult ExpenseLine(BaseMoneyModel bmm)
         {
             bmm.Email = wholeProgram.User.Email;
             if (bmm.isExpense) bmm.Amount = -Math.Abs(bmm.Amount);
             wholeProgram.UserFinanceList.Add(bmm);
-            return RedirectToAction(nameof(Expenses));
+            return RedirectToAction(nameof(Index));
         }
         public IActionResult ExpenseLineDelete(int id = -1, int type = 0)
         {
@@ -108,7 +110,7 @@ namespace Financial.Controllers
                 }
             }
 
-            return RedirectToAction(nameof(Expenses));
+            return RedirectToAction(nameof(Index));
         }
         public IActionResult Save()
         {
@@ -118,13 +120,13 @@ namespace Financial.Controllers
             var a = JsonConvert.SerializeObject(list.ToArray());
             try
             {
-                System.IO.File.WriteAllText("data.txt", a);
+                System.IO.File.WriteAllText("data.json", a);
             }
             catch(Exception e)
             {
                 var b = " d";
             }
-            return RedirectToAction(nameof(Expenses));
+            return RedirectToAction(nameof(Index));
         }
         public void Load<T>(string filename, out List<T> foruser, out List<T> forothers) where T : LinkingEmail
         {
@@ -152,38 +154,68 @@ namespace Financial.Controllers
                 (System.IO.File.Create(filename)).Close();
             }
         }
-        public IActionResult Sort(string type)
+        public IActionResult Sort(SettingsModel sm)
         {
-            wholeProgram.Settings.Sort = type;
-            var _list = wholeProgram.UserFinanceList.ToList();
+            Settings.SortType = sm.SortType;
+            var _list = new List<BaseMoneyModel>(wholeProgram.UserFinanceList);
             var orderByResult = from s in _list select s;
-            if (wholeProgram.Settings.Sort == "Name")
+            if (Settings.SortType == "Name")
             {
                 orderByResult = from s in _list
                                 orderby s.Product descending
                                 select s;
             }
-            else if(wholeProgram.Settings.Sort == "Place")
+            else if(Settings.SortType == "Place")
             {
                 orderByResult = from s in _list
                                 orderby s.Place descending
                                 select s;
             }
-            else if (wholeProgram.Settings.Sort == "Amount")
+            else if (Settings.SortType == "Amount")
             {
                 orderByResult = from s in _list
                                 orderby s.Amount descending
                                 select s;
             }
-            else if (wholeProgram.Settings.Sort == "Date")
+            else if (Settings.SortType == "Date")
             {
                 orderByResult = from s in _list
                                 orderby s.Date descending
                                 select s;
             }
-            wholeProgram.UserFinanceList = new BaseMoneyListModel(orderByResult);
+            wholeProgram.UserFinanceList.Clear();
+            wholeProgram.UserFinanceList.AddRange(orderByResult);
+            Settings.PresentList = wholeProgram.UserFinanceList;
             //return RedirectToAction(nameof(Expenses));
-            return RedirectToAction(nameof(Index1));
+            return RedirectToAction(nameof(Index));
+        }
+        public IActionResult Filter(SettingsModel sm)
+        {
+            Settings.From = sm.From;
+            Settings.To = sm.To;
+            Settings.IsExpense = sm.IsExpense;
+            Settings.IsIncome = sm.IsIncome;
+            var query = from s in wholeProgram.UserFinanceList select s;
+            if (Settings.From.CompareTo(DateTime.Now) < 0)
+            {
+                query = from finance in query
+                        where finance.Date.CompareTo(DateTime.Now) > 0
+                        select finance;
+            }
+            if (Settings.To.CompareTo(DateTime.Now) < 0)
+            {
+                query = from finance in query
+                        where finance.Date.CompareTo(DateTime.Now) < 0
+                        select finance;
+            }
+             
+            query = from finance in query
+                    where (finance.isExpense == true && Settings.IsExpense == true) || (finance.isExpense == false && Settings.IsIncome == true)
+                    select finance;
+
+            Settings.PresentList = new List<BaseMoneyModel>(query);
+
+            return RedirectToAction(nameof(Index));
         }
         public IActionResult Logout()
         {
@@ -197,20 +229,20 @@ namespace Financial.Controllers
         public IActionResult RegisterForm(UserModel um)
         {
             List<UserModel> foruser, forall;
-            Load<UserModel>("users.txt", out foruser, out forall);
+            Load<UserModel>("users.json", out foruser, out forall);
             if (foruser.Count == 0) {
                 wholeProgram.User = um;
                 if (wholeProgram.User.ConfirmPassword == wholeProgram.User.Password)
                 {
                     forall.Add(wholeProgram.User);
-                    System.IO.File.WriteAllText("users.txt", JsonConvert.SerializeObject(forall));
+                    System.IO.File.WriteAllText("users.json", JsonConvert.SerializeObject(forall));
                 }
                 else
                 {
+                    SettingsModel.ErrorFlag = true;
                     return RedirectToAction(nameof(Register));
                 }
             }
-
             return RedirectToAction(nameof(Index));
         }
 
