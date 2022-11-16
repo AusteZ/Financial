@@ -83,13 +83,13 @@
                             "Edit", 
                             "ExpensesForm",                         // controller action
                             "Home",        // controller
-                            new { id = expense.Index },         // action parameters aka route values
+                            new { id = expense.Id.ToString() },         // action parameters aka route values
                             new { @class = "btn btn-light" })
                         @Html.ActionLink(
                             "Delete", 
                             "ExpenseLineDelete",                         // controller action
                             "Home",        // controller
-                            new { id = expense.Index , type = 0},         // action parameters aka route values
+                            new { id = expense.Id.ToString() , type = 0},         // action parameters aka route values
                             new { @class = "btn btn-light" })
    
                     </td>
@@ -108,13 +108,13 @@
                             "Edit", 
                             "ExpensesForm",                         // controller action
                             "Home",        // controller
-                            new { id = expense.Index },         // action parameters aka route values
+                            new { id = expense.Id.ToString() },         // action parameters aka route values
                             new { @class = "btn btn-light" })
                         @Html.ActionLink(
                             "Delete", 
                             "ExpenseLineDelete",                         // controller action
                             "Home",        // controller
-                            new { id = expense.Index , type = 0},         // action parameters aka route values
+                    new { id = expense.Id.ToString() , type = 0},         // action parameters aka route values
                             new { @class = "btn btn-light" })
    
                     </td>
