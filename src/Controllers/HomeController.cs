@@ -4,22 +4,29 @@ using System.Diagnostics;
 using Newtonsoft.Json;
 using System.Collections;
 using NuGet.Packaging.Signing;
+using Microsoft.Data.SqlClient;
+using Financial.Data;
+using System.Configuration;
+using Microsoft.EntityFrameworkCore;
 
 namespace Financial.Controllers
 {
     public class HomeController : Controller
     {
         private static FinanceModel wholeProgram = new FinanceModel();
-        private static SettingsModel Settings = new SettingsModel();
-        
-
-        //private static UserModel user = new UserModel();
+        private static SettingsModel settings = new SettingsModel();
+        private FinanceContext _context;
+        private DbSet<UserModel> _users;
+        private DbSet<BaseMoneyModel> _finances;
 
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, FinanceContext context)
         {
             _logger = logger;
+            _context = context;
+            _users = context.users;
+            _finances = context.finances;
         }
 
         public IActionResult Index()
@@ -30,17 +37,17 @@ namespace Financial.Controllers
             }
             if(wholeProgram.UserFinanceList.Count() == 0)
             {
-                List<BaseMoneyModel> foruser, forothers;
-                Load<BaseMoneyModel>("data.json", out foruser, out forothers);
-                wholeProgram.UserFinanceList = foruser;
-                wholeProgram.AllOtherUsersFinanceList = forothers;
-                Settings.PresentList = wholeProgram.UserFinanceList;
+                var _list = from one in _finances
+                            where one.Email == wholeProgram.User.Email
+                            select one;
+                wholeProgram.UserFinanceList = new List<BaseMoneyModel>(_list);
+                settings.PresentList = wholeProgram.UserFinanceList;
             }
             
             wholeProgram.Statistics.SetList(wholeProgram.UserFinanceList.ToList());
             SettingsModel.ErrorFlag = false;
 
-            return View(Settings);
+            return View(settings);
         }
         public IActionResult StatisticsSettings(StatisticsModel sm)
         {
@@ -53,15 +60,16 @@ namespace Financial.Controllers
         }
         public IActionResult LoginForm(UserModel _user)
         {
-            wholeProgram.User = _user;
-            List<UserModel> foruser;
-            Load<UserModel>("users.json", out foruser, out _);
-            if (foruser.Count != 1 || foruser[0].Password != wholeProgram.User.Password)
+            var _userTemp = from one in _users
+                            where one.Email == _user.Email && one.Password == _user.Password
+                            select one;
+            if (_userTemp.Any()) wholeProgram.User = _userTemp.First();
+            else
             {
                 wholeProgram.User = new UserModel();
                 SettingsModel.ErrorFlag = true;
             }
-                
+
             return RedirectToAction(nameof(Index));
         }
         public IActionResult Expenses()
@@ -69,42 +77,42 @@ namespace Financial.Controllers
             return View(wholeProgram.UserFinanceList);
         }
         [Route("Home/ExpensesForm/{id?}")]
-        public IActionResult ExpensesForm(int id = -1, int type = 0)
+        public IActionResult ExpensesForm(string id, int type = 0)
         {
             BaseMoneyModel expense = new BaseMoneyModel();
-            if (id != -1)
+            foreach(var exp in wholeProgram.UserFinanceList)
             {
-                foreach(var exp in wholeProgram.UserFinanceList)
+                if(exp.Id.ToString() == id)
                 {
-                    if(exp.Index == id)
-                    {
-                        expense = exp;
-                        wholeProgram.UserFinanceList.Remove(expense);
-                        break;
-                    }
+                    expense = exp;
+                    wholeProgram.UserFinanceList.Remove(expense);
+                    _finances.Remove(expense);
+                    id = "";
+                    break;
                 }
             }
+            if (id != "") expense.Id = new Guid();
             if (type == 1) expense.isExpense = false;
             return View(expense);
         }
 
-        public IActionResult CategoriesForm(BaseMoneyModel category = null)
-        {
-            category = category ?? new BaseMoneyModel();
-            return View(category);
-        }
         public IActionResult ExpenseLine(BaseMoneyModel bmm)
         {
             bmm.Email = wholeProgram.User.Email;
             if (bmm.isExpense) bmm.Amount = -Math.Abs(bmm.Amount);
+            bmm.Category ??= "";
+            bmm.Place ??= "";
             wholeProgram.UserFinanceList.Add(bmm);
+            _finances.Add(bmm);
+            _context.SaveChanges();
+
             return RedirectToAction(nameof(Index));
         }
-        public IActionResult ExpenseLineDelete(int id = -1, int type = 0)
+        public IActionResult ExpenseLineDelete(string id, int type = 0)
         {
             foreach(var exp in wholeProgram.UserFinanceList)
             {
-                if(exp.Index == id)
+                if(exp.Id.ToString() == id)
                 {
                     wholeProgram.UserFinanceList.Remove(exp);
                 }
@@ -112,108 +120,20 @@ namespace Financial.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-        public IActionResult Save()
-        {
-            List<BaseMoneyModel> list = new List<BaseMoneyModel>();
-            if (wholeProgram.UserFinanceList.Count() > 0) list.AddRange(wholeProgram.UserFinanceList.ToList());
-            if (wholeProgram.AllOtherUsersFinanceList.Count() > 0) list.AddRange(wholeProgram.AllOtherUsersFinanceList.ToList());
-            var a = JsonConvert.SerializeObject(list.ToArray());
-            try
-            {
-                System.IO.File.WriteAllText("data.json", a);
-            }
-            catch(Exception e)
-            {
-                var b = " d";
-            }
-            return RedirectToAction(nameof(Index));
-        }
-        public void Load<T>(string filename, out List<T> foruser, out List<T> forothers) where T : LinkingEmail
-        {
-            foruser = new List<T>();
-            forothers = new List<T>();
-            IEnumerable list;
-            if (System.IO.File.Exists(filename) && (new FileInfo(filename)).Length != 0)
-            {
-                var filestream = System.IO.File.ReadAllText(filename);
-                list = (JsonConvert.DeserializeObject<T[]>(filestream)).ToList();
-                foreach (T item in list)
-                {
-                    if (item.Email == wholeProgram.User.Email)
-                    {
-                        foruser.Add(item);
-                    }
-                    else
-                    {
-                        forothers.Add(item);
-                    }
-                }
-            }
-            else
-            {
-                (System.IO.File.Create(filename)).Close();
-            }
-        }
         public IActionResult Sort(SettingsModel sm)
         {
-            Settings.SortType = sm.SortType;
-            var _list = new List<BaseMoneyModel>(wholeProgram.UserFinanceList);
-            var orderByResult = from s in _list select s;
-            if (Settings.SortType == "Name")
-            {
-                orderByResult = from s in _list
-                                orderby s.Product descending
-                                select s;
-            }
-            else if(Settings.SortType == "Place")
-            {
-                orderByResult = from s in _list
-                                orderby s.Place descending
-                                select s;
-            }
-            else if (Settings.SortType == "Amount")
-            {
-                orderByResult = from s in _list
-                                orderby s.Amount descending
-                                select s;
-            }
-            else if (Settings.SortType == "Date")
-            {
-                orderByResult = from s in _list
-                                orderby s.Date descending
-                                select s;
-            }
-            wholeProgram.UserFinanceList.Clear();
-            wholeProgram.UserFinanceList.AddRange(orderByResult);
-            Settings.PresentList = wholeProgram.UserFinanceList;
-            //return RedirectToAction(nameof(Expenses));
+            settings.SortType = sm.SortType;
+            SettingsModel.Sort(settings);
             return RedirectToAction(nameof(Index));
         }
         public IActionResult Filter(SettingsModel sm)
         {
-            Settings.From = sm.From;
-            Settings.To = sm.To;
-            Settings.IsExpense = sm.IsExpense;
-            Settings.IsIncome = sm.IsIncome;
-            var query = from s in wholeProgram.UserFinanceList select s;
-            if (Settings.From.CompareTo(DateTime.Now) < 0)
-            {
-                query = from finance in query
-                        where finance.Date.CompareTo(DateTime.Now) > 0
-                        select finance;
-            }
-            if (Settings.To.CompareTo(DateTime.Now) < 0)
-            {
-                query = from finance in query
-                        where finance.Date.CompareTo(DateTime.Now) < 0
-                        select finance;
-            }
-             
-            query = from finance in query
-                    where (finance.isExpense == true && Settings.IsExpense == true) || (finance.isExpense == false && Settings.IsIncome == true)
-                    select finance;
-
-            Settings.PresentList = new List<BaseMoneyModel>(query);
+            settings.From = sm.From;
+            settings.To = sm.To;
+            settings.IsExpense = sm.IsExpense;
+            settings.IsIncome = sm.IsIncome;
+            settings.PresentList = new List<BaseMoneyModel>(wholeProgram.UserFinanceList);
+            SettingsModel.Filter(settings);
 
             return RedirectToAction(nameof(Index));
         }
@@ -228,20 +148,15 @@ namespace Financial.Controllers
         }
         public IActionResult RegisterForm(UserModel um)
         {
-            List<UserModel> foruser, forall;
-            Load<UserModel>("users.json", out foruser, out forall);
-            if (foruser.Count == 0) {
+            var _usertemp = from one in _users
+                            where one.Email == um.Email
+                            select one;
+            if (!_usertemp.Any())
+            {
                 wholeProgram.User = um;
-                if (wholeProgram.User.ConfirmPassword == wholeProgram.User.Password)
-                {
-                    forall.Add(wholeProgram.User);
-                    System.IO.File.WriteAllText("users.json", JsonConvert.SerializeObject(forall));
-                }
-                else
-                {
-                    SettingsModel.ErrorFlag = true;
-                    return RedirectToAction(nameof(Register));
-                }
+                wholeProgram.User.Id = Guid.NewGuid();
+                _users.Add(um);
+                _context.SaveChanges();
             }
             return RedirectToAction(nameof(Index));
         }
