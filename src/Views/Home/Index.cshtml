@@ -129,8 +129,8 @@
             <a id="none" asp-controller="Home" asp-action="ExpensesForm" class="btn button">Create New
                 Expense</a>
             <a id="none" asp-controller="Home" asp-action="ExpensesForm" asp-route-type="1" class="btn button">
-                Create
-                New Income</a>
+                Create New Income</a>
+            <a id="none" asp-controller="Home" asp-action="Download" class="btn button">Export finances</a>
         </div>
         <div id="filterdiv" class="form-padding">
             <form asp-controller="Home" asp-action="Filter">
@@ -139,16 +139,6 @@
                     <input asp-for=IsExpense type="checkbox" />
                     <label class="form-label padding-left">Incomes</label>
                     <input asp-for=IsIncome type="checkbox" />
-                </div>
-                <div class="form-row">
-                    <div div class="col">
-                        <label class="form-label">Date</label>
-                        <input asp-for=From type="date" class="form-control" />
-                    </div>
-                    <div div class="col">
-                        <label class="form-label">Date</label>
-                        <input asp-for=To type="date" class="form-control" />
-                    </div>
                 </div>
                 <div class="mt-3">
                     <button type="submit" class="btn btn-light">Submit</button>
@@ -163,7 +153,6 @@
                         <option id="Name" value = "Name" >Name</option>
                         <option id="Place" value="Place" >Place</option>
                         <option id="Amount" value = "Amount" >Amount</option>
-                        <option id="Date" value="Date" >Date</option>
                     </select>
                 </div>
                 
@@ -178,10 +167,8 @@
             <thead>
                 <tr class="text-white">
                     <th scope="col">Name</th>
-                    <th scope="col">Category</th>
                     <th scope="col">Amount</th>
                     <th scope="col">Currency</th>
-                    <th scope="col">Date</th>
                     <th scope="col">Place</th>
                     <th scope="col"></th>
                 </tr>
@@ -190,10 +177,8 @@
                 @foreach (var expense in Model.PresentList) {@if(expense.isExpense==true){
                 <tr class="bg-red">
                     <td>@expense.Product</td>
-                    <td>@expense.Category</td>
                     <td>@expense.Amount</td>
                     <td>@expense.Currency</td>
-                    <td>@expense.Date.ToString("yyyy-MM-dd")</td>
                     <td>@expense.Place</td>
                     <td>
                         @Html.ActionLink(
@@ -215,10 +200,8 @@
                 @if(expense.isExpense==false){
                 <tr class="bg-green">
                     <td>@expense.Product</td>
-                    <td>@expense.Category</td>
                     <td>@expense.Amount</td>
                     <td>@expense.Currency</td>
-                    <td>@expense.Date.ToString("yyyy-MM-dd")</td>
                     <td>@expense.Place</td>
                     <td>
                         @Html.ActionLink(

@@ -8,52 +8,56 @@ using Microsoft.Data.SqlClient;
 using Financial.Data;
 using System.Configuration;
 using Microsoft.EntityFrameworkCore;
+using static System.Net.Mime.MediaTypeNames;
+using System.Text;
+using Org.BouncyCastle.Utilities;
 
 namespace Financial.Controllers
 {
     public class HomeController : Controller
     {
-        private static FinanceModel wholeProgram = new FinanceModel();
-        private static SettingsModel settings = new SettingsModel();
-        private FinanceContext _context;
-        private DbSet<UserModel> _users;
-        private DbSet<BaseMoneyModel> _finances;
+        private static List<BaseMoneyModel> _userFinanceList = new();
+        private static Guid _currentUser { get; set; }
+        private static SettingsModel _settings = new SettingsModel();
+        //private static SettingsModel settings = new SettingsModel();
+        private static FinanceContext _context;
+        private static DbSet<UserModel> _users;
+        private static DbSet<BaseMoneyModel> _finances;
 
         private readonly ILogger<HomeController> _logger;
 
+        public delegate TResult SaveTo<TResult>(string json);
+
         public HomeController(ILogger<HomeController> logger, FinanceContext context)
         {
+            //test += "Controller -> ";
+            //_currentUser = Guid.Empty;
             _logger = logger;
             _context = context;
             _users = context.users;
             _finances = context.finances;
+            _settings.PriceChanged += SaveSettings;
         }
 
         public IActionResult Index()
         {
-            if (wholeProgram.User.Email == "" || wholeProgram.User.Password == "")
+            if (_currentUser == Guid.Empty)
             {
                 return RedirectToAction(nameof(Login));
             }
-            if(wholeProgram.UserFinanceList.Count() == 0)
+            if(!_userFinanceList.Any())
             {
                 var _list = from one in _finances
-                            where one.Email == wholeProgram.User.Email
+                            where one.UserId == _currentUser
                             select one;
-                wholeProgram.UserFinanceList = new List<BaseMoneyModel>(_list);
-                settings.PresentList = wholeProgram.UserFinanceList;
+                _userFinanceList = new List<BaseMoneyModel>(_list);
+                _settings.PresentList = _userFinanceList;
             }
-            
-            wholeProgram.Statistics.SetList(wholeProgram.UserFinanceList.ToList());
             SettingsModel.ErrorFlag = false;
 
-            return View(settings);
+            return View(_settings);
         }
-        public IActionResult StatisticsSettings(StatisticsModel sm)
-        {
-            wholeProgram.Statistics = sm;
-            return RedirectToAction(nameof(Index));
-        }
+
         public IActionResult Login()
         {
             return View(new UserModel());
@@ -63,10 +67,10 @@ namespace Financial.Controllers
             var _userTemp = from one in _users
                             where one.Email == _user.Email && one.Password == _user.Password
                             select one;
-            if (_userTemp.Any()) wholeProgram.User = _userTemp.First();
+            if (_userTemp.Any()) _currentUser = _userTemp.First().Id;
             else
             {
-                wholeProgram.User = new UserModel();
+                _currentUser = Guid.Empty;
                 SettingsModel.ErrorFlag = true;
             }
 
@@ -74,19 +78,19 @@ namespace Financial.Controllers
         }
         public IActionResult Expenses()
         {
-            return View(wholeProgram.UserFinanceList);
+            return View(_userFinanceList);
         }
         [Route("Home/ExpensesForm/{id?}")]
         public IActionResult ExpensesForm(string id, int type = 0)
         {
             BaseMoneyModel expense = new BaseMoneyModel();
-            foreach(var exp in wholeProgram.UserFinanceList)
+            foreach(var exp in _userFinanceList)
             {
                 if(exp.Id.ToString() == id)
                 {
                     expense = exp;
-                    wholeProgram.UserFinanceList.Remove(expense);
-                    _finances.Remove(expense);
+                    //_userFinanceList.Remove(expense);
+                    //_finances.Remove(expense);
                     id = "";
                     break;
                 }
@@ -98,23 +102,25 @@ namespace Financial.Controllers
 
         public IActionResult ExpenseLine(BaseMoneyModel bmm)
         {
-            bmm.Email = wholeProgram.User.Email;
+            if(bmm.UserId != _currentUser)
+            {
+                bmm.UserId = _currentUser;
+                _userFinanceList.Add(bmm);
+                _finances.Add(bmm);
+            } 
             if (bmm.isExpense) bmm.Amount = -Math.Abs(bmm.Amount);
-            bmm.Category ??= "";
-            bmm.Place ??= "";
-            wholeProgram.UserFinanceList.Add(bmm);
-            _finances.Add(bmm);
+
             _context.SaveChanges();
 
             return RedirectToAction(nameof(Index));
         }
         public IActionResult ExpenseLineDelete(string id, int type = 0)
         {
-            foreach(var exp in wholeProgram.UserFinanceList)
+            foreach(var exp in _userFinanceList)
             {
                 if(exp.Id.ToString() == id)
                 {
-                    wholeProgram.UserFinanceList.Remove(exp);
+                    _userFinanceList.Remove(exp);
                 }
             }
 
@@ -122,24 +128,30 @@ namespace Financial.Controllers
         }
         public IActionResult Sort(SettingsModel sm)
         {
-            settings.SortType = sm.SortType;
-            SettingsModel.Sort(settings);
+            _settings.SortType = sm.SortType;
+            SettingsModel.Sort(_settings);
+            //_users.Settings
             return RedirectToAction(nameof(Index));
         }
         public IActionResult Filter(SettingsModel sm)
         {
-            settings.From = sm.From;
-            settings.To = sm.To;
-            settings.IsExpense = sm.IsExpense;
-            settings.IsIncome = sm.IsIncome;
-            settings.PresentList = new List<BaseMoneyModel>(wholeProgram.UserFinanceList);
-            SettingsModel.Filter(settings);
+            _settings.From = sm.From;
+            _settings.To = sm.To;
+            _settings.IsExpense = sm.IsExpense;
+            _settings.IsIncome = sm.IsIncome;
+            _settings.PresentList = new List<BaseMoneyModel>(_userFinanceList);
+            SettingsModel.Filter(_settings);
 
             return RedirectToAction(nameof(Index));
         }
         public IActionResult Logout()
         {
-            wholeProgram = new FinanceModel();
+            _userFinanceList = new List<BaseMoneyModel>();
+            _currentUser = Guid.Empty;
+            _settings = new SettingsModel();
+
+            //wholeProgram = new FinanceModel();
+
             return RedirectToAction(nameof(Index));
         }
         public IActionResult Register()
@@ -153,14 +165,70 @@ namespace Financial.Controllers
                             select one;
             if (!_usertemp.Any())
             {
-                wholeProgram.User = um;
-                wholeProgram.User.Id = Guid.NewGuid();
+                um.Id = Guid.NewGuid();
                 _users.Add(um);
+                _currentUser = um.Id;
                 _context.SaveChanges();
             }
             return RedirectToAction(nameof(Index));
         }
-
+        public async void SaveSettings(object o, EventArgs e)
+        {
+            //Thread e = new Thread();
+            if(SettingsModel.ErrorFlag == false)
+            {
+                SettingsModel.ErrorFlag = true;
+                await Task.Delay(60000);
+                SaveTo<string> _saveTo = (json) =>
+                {
+                    return json;
+                };
+                try
+                {
+                    Monitor.Enter(_context.users);
+                    try
+                    {
+                        _context.users.FirstOrDefault(x => x.Id.ToString() == _currentUser.ToString()).settings = Save<SettingsModel, string>(_settings, _saveTo);
+                    }
+                    finally
+                    {
+                        Monitor.Exit(_context.users);
+                    }
+                }
+                catch (SynchronizationLockException SyncEx)
+                {
+                    var b = "";
+                }
+                catch (Exception ex){
+                    var b = "";
+                }
+                
+                _context.SaveChanges();
+                SettingsModel.ErrorFlag = false;
+            }
+        }
+        public UserModel GetUserInstance()
+        {
+            return _context.users.FirstOrDefault(x => x.Id.ToString() == _currentUser.ToString());
+        }
+        public IActionResult Download()
+        {
+            SaveTo<byte[]> _saveTo = (x) => Encoding.UTF8.GetBytes(x);
+            return File(Save(_finances.ToArray(), _saveTo), "application/json", "finances.json");
+        }
+        public TResult Save<T, TResult>(T savee, SaveTo<TResult> st)
+        {
+            try
+            {
+                var jsonstring = JsonConvert.SerializeObject(savee, Formatting.Indented);
+                return st(jsonstring);
+            }
+            catch (NullReferenceException nre)
+            {
+                return default(TResult);
+            }
+        }
+        
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
