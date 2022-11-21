@@ -1,16 +1,47 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
+using Newtonsoft.Json;
 using NuGet.Configuration;
+using System.Drawing.Printing;
 
 namespace Financial.Models
 {
+    [Serializable]
     public class SettingsModel
     {
+        [JsonIgnore]
         public static bool ErrorFlag { get; set; } = false;
+        [JsonIgnore]
         public List<BaseMoneyModel> PresentList = new List<BaseMoneyModel>();
-        public string SortType { get; set; } = "Date";
-        public bool SortDec { get; set; } = false;
-        public bool IsExpense { get; set; } = true;
-        public bool IsIncome { get; set; } = true;
+        private string _sortType = "Date";
+        public string SortType { get => _sortType; set
+            {
+                _sortType = value;
+                OnPriceChanged(EventArgs.Empty);
+            } 
+        }
+        private bool sortDec = false, isExpense = true, isIncome = true;
+        public bool SortDec { get => sortDec; set
+            {
+                sortDec = value;
+                OnPriceChanged(EventArgs.Empty);
+            }
+        }
+        public bool IsExpense
+        {
+            get => isExpense; set
+            {
+                isExpense = value;
+                OnPriceChanged(EventArgs.Empty);
+            }
+        }
+        public bool IsIncome
+        {
+            get => isIncome; set
+            {
+                isIncome = value;
+                OnPriceChanged(EventArgs.Empty);
+            }
+        }
         private DateTime _from = DateTime.Now.AddDays(1), _to = DateTime.Now.AddDays(1);
         public DateTime From {
             get => _from;
@@ -24,6 +55,27 @@ namespace Financial.Models
                 _to = checkDate(value);
                 _from = _to.CompareTo(_from) < 0 ? _from : DateTime.Now.AddDays(1);
             }
+        }
+        private EventHandler _priceChanged;
+        public event EventHandler PriceChanged
+        {
+            add
+            {
+                if (_priceChanged == null || !_priceChanged.GetInvocationList().Contains(value))
+                {
+                    _priceChanged += value;
+                }
+            }
+            remove
+            {
+                _priceChanged -= value;
+            }
+        }
+
+
+        protected virtual void OnPriceChanged(EventArgs e)
+        {
+            _priceChanged?.Invoke(this, e);
         }
         private DateTime checkDate(DateTime dm)
         {
@@ -64,15 +116,15 @@ namespace Financial.Models
             var query = from s in sm.PresentList select s;
             if (sm.From.CompareTo(DateTime.Now) < 0)
             {
-                query = from finance in query
+                /*query = from finance in query
                         where finance.Date.CompareTo(DateTime.Now) > 0
-                        select finance;
+                        select finance;*/
             }
             if (sm.To.CompareTo(DateTime.Now) < 0)
             {
-                query = from finance in query
+                /*query = from finance in query
                         where finance.Date.CompareTo(DateTime.Now) < 0
-                        select finance;
+                        select finance;*/
             }
 
             query = from finance in query

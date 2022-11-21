@@ -2,7 +2,7 @@
 {
     public class StatisticsModel
     {
-        private static List<BaseMoneyModel> _expenselist = new List<BaseMoneyModel>();
+        /*private static List<BaseMoneyModel> _expenselist = new List<BaseMoneyModel>();
         private static List<BaseMoneyModel> _incomelist = new List<BaseMoneyModel>();
 
         public DateTime From { get; set; } = DateTime.Now.AddDays(1);
@@ -112,6 +112,6 @@
             
             return count;
             //return u;
-        }
+        }*/
     }
 }

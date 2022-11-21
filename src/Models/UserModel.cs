@@ -3,12 +3,14 @@
 namespace Financial.Models
 {
     [Serializable]
-    public class UserModel : LinkingEmail
+    public class UserModel
     {
         //public int Id { get; set; }
         public Guid Id { get; set; }
+        public string settings { get; set; } = "";
+        private string _email = "";
         private string _password = "";
-        public override string Email
+        public string Email
         {
             get => _email; set
             {
@@ -27,7 +29,5 @@ namespace Financial.Models
 
             }
         }
-
-        public UserModel() { }
     }
 }

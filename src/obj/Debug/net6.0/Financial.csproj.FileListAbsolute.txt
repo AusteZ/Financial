@@ -1247,3 +1247,4 @@ C:\Users\auste\Documents\Projects\PSI\Financial\src\bin\Debug\net6.0\web.config
 C:\Users\auste\Documents\Projects\PSI\Financial\src\bin\Debug\net6.0\Npgsql.dll
 C:\Users\auste\Documents\Projects\PSI\Financial\src\bin\Debug\net6.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
 C:\Users\auste\Documents\Projects\PSI\Financial\src\bin\Debug\net6.0\EFCore.NamingConventions.dll
+C:\Users\auste\Documents\Projects\PSI\Financial\src\bin\Debug\net6.0\finances.json
