@@ -1,21 +1,18 @@
-﻿using Financial.Models;
+﻿using Financial.Data;
+using Financial.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using Newtonsoft.Json;
-using System.Collections;
-using NuGet.Packaging.Signing;
-using Microsoft.Data.SqlClient;
-using Financial.Data;
-using System.Configuration;
 using Microsoft.EntityFrameworkCore;
-using static System.Net.Mime.MediaTypeNames;
+using Newtonsoft.Json;
+using System.Diagnostics;
 using System.Text;
-using Org.BouncyCastle.Utilities;
+using static Financial.Controllers.HomeController;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Financial.Controllers
 {
     public class HomeController : Controller
     {
+        static int b = 0;
         private static List<BaseMoneyModel> _userFinanceList = new();
         private static Guid _currentUser { get; set; }
         private static SettingsModel _settings = new SettingsModel();
@@ -45,7 +42,7 @@ namespace Financial.Controllers
             {
                 return RedirectToAction(nameof(Login));
             }
-            if(!_userFinanceList.Any())
+            if (!_userFinanceList.Any())
             {
                 var _list = from one in _finances
                             where one.UserId == _currentUser
@@ -84,9 +81,9 @@ namespace Financial.Controllers
         public IActionResult ExpensesForm(string id, int type = 0)
         {
             BaseMoneyModel expense = new BaseMoneyModel();
-            foreach(var exp in _userFinanceList)
+            foreach (var exp in _userFinanceList)
             {
-                if(exp.Id.ToString() == id)
+                if (exp.Id.ToString() == id)
                 {
                     expense = exp;
                     //_userFinanceList.Remove(expense);
@@ -102,12 +99,12 @@ namespace Financial.Controllers
 
         public IActionResult ExpenseLine(BaseMoneyModel bmm)
         {
-            if(bmm.UserId != _currentUser)
+            if (bmm.UserId != _currentUser)
             {
                 bmm.UserId = _currentUser;
                 _userFinanceList.Add(bmm);
                 _finances.Add(bmm);
-            } 
+            }
             if (bmm.isExpense) bmm.Amount = -Math.Abs(bmm.Amount);
 
             _context.SaveChanges();
@@ -116,9 +113,9 @@ namespace Financial.Controllers
         }
         public IActionResult ExpenseLineDelete(string id, int type = 0)
         {
-            foreach(var exp in _userFinanceList)
+            foreach (var exp in _userFinanceList)
             {
-                if(exp.Id.ToString() == id)
+                if (exp.Id.ToString() == id)
                 {
                     _userFinanceList.Remove(exp);
                 }
@@ -172,10 +169,10 @@ namespace Financial.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
-        public async void SaveSettings(object o, EventArgs e)
+        public  async void SaveSettings(object o, EventArgs e)
         {
             //Thread e = new Thread();
-            if(SettingsModel.ErrorFlag == false)
+            if (SettingsModel.ErrorFlag == false)
             {
                 SettingsModel.ErrorFlag = true;
                 await Task.Delay(60000);
@@ -188,28 +185,31 @@ namespace Financial.Controllers
                     Monitor.Enter(_context.users);
                     try
                     {
-                        _context.users.FirstOrDefault(x => x.Id.ToString() == _currentUser.ToString()).settings = Save<SettingsModel, string>(_settings, _saveTo);
+                        var temp = await _context.users.FirstOrDefaultAsync(x => x.Id.ToString() == _currentUser.ToString());
+
+                        if (temp != null)
+                        {
+                            temp.settings = Save<SettingsModel, string>(_settings, _saveTo);
+                        }
                     }
                     finally
                     {
                         Monitor.Exit(_context.users);
                     }
+                    await _context.SaveChangesAsync();
                 }
-                catch (SynchronizationLockException SyncEx)
+                catch (ObjectDisposedException ObjDisEx)
                 {
-                    var b = "";
+                    ++b;
+                    LogErrors(ObjDisEx);
                 }
-                catch (Exception ex){
-                    var b = "";
+                catch(Exception ex)
+                {
+                    LogErrors(ex);
                 }
-                
-                _context.SaveChanges();
+
                 SettingsModel.ErrorFlag = false;
             }
-        }
-        public UserModel GetUserInstance()
-        {
-            return _context.users.FirstOrDefault(x => x.Id.ToString() == _currentUser.ToString());
         }
         public IActionResult Download()
         {
@@ -223,12 +223,38 @@ namespace Financial.Controllers
                 var jsonstring = JsonConvert.SerializeObject(savee, Formatting.Indented);
                 return st(jsonstring);
             }
-            catch (NullReferenceException nre)
+            catch (ExceptionLoggingException ELE)
             {
                 return default(TResult);
             }
+            catch (Exception ex)
+            {
+                LogErrors(ex);
+
+                return default(TResult);
+            }
         }
-        
+        public async void LogErrors(Exception ex)
+        {
+            try
+            {
+                SaveTo<string> _saveto = (x) => x;
+                var error = new Dictionary<string, string>
+                {
+                    {"Type", ex.GetType().ToString()},
+                    {"Message", ex.Message},
+                    {"StackTrace", ex.StackTrace}
+                };
+                var exceptionjson = Save<Dictionary<string, string>, string>(error, _saveto);
+                await System.IO.File.AppendAllTextAsync("errors.json", exceptionjson);
+            }
+            catch (Exception e)
+            {
+                throw new ExceptionLoggingException("", e);
+            }
+            
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
