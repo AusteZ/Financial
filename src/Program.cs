@@ -1,4 +1,5 @@
 using Financial.Data;
+using Financial.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Configuration;
@@ -9,6 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<FinanceContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("FinanceDB")));
+builder.Services.AddSingleton<List<BaseMoneyModel>>();
+builder.Services.AddSingleton<SettingsModel>();
 
 var app = builder.Build();
 
