@@ -13,10 +13,9 @@ namespace Financial.Controllers
     public class HomeController : Controller
     {
         static int b = 0;
-        private static List<BaseMoneyModel> _userFinanceList = new();
+        private static List<BaseMoneyModel> _userFinanceList;
         private static Guid _currentUser { get; set; }
-        private static SettingsModel _settings = new SettingsModel();
-        //private static SettingsModel settings = new SettingsModel();
+        private static SettingsModel _settings;
         private static FinanceContext _context;
         private static DbSet<UserModel> _users;
         private static DbSet<BaseMoneyModel> _finances;
@@ -25,14 +24,14 @@ namespace Financial.Controllers
 
         public delegate TResult SaveTo<TResult>(string json);
 
-        public HomeController(ILogger<HomeController> logger, FinanceContext context)
+        public HomeController(ILogger<HomeController> logger, FinanceContext context, List<BaseMoneyModel> _list, SettingsModel sm)
         {
-            //test += "Controller -> ";
-            //_currentUser = Guid.Empty;
             _logger = logger;
             _context = context;
             _users = context.users;
             _finances = context.finances;
+            _userFinanceList = _list;
+            _settings = sm;
             _settings.PriceChanged += SaveSettings;
         }
 
@@ -47,7 +46,7 @@ namespace Financial.Controllers
                 var _list = from one in _finances
                             where one.UserId == _currentUser
                             select one;
-                _userFinanceList = new List<BaseMoneyModel>(_list);
+                _userFinanceList.AddRange(_list);
                 _settings.PresentList = _userFinanceList;
             }
             SettingsModel.ErrorFlag = false;
@@ -86,13 +85,11 @@ namespace Financial.Controllers
                 if (exp.Id.ToString() == id)
                 {
                     expense = exp;
-                    //_userFinanceList.Remove(expense);
-                    //_finances.Remove(expense);
                     id = "";
                     break;
                 }
             }
-            if (id != "") expense.Id = new Guid();
+            if (id != "") expense.Id = Guid.NewGuid();
             if (type == 1) expense.isExpense = false;
             return View(expense);
         }
@@ -143,11 +140,9 @@ namespace Financial.Controllers
         }
         public IActionResult Logout()
         {
-            _userFinanceList = new List<BaseMoneyModel>();
+            _userFinanceList.Clear();
             _currentUser = Guid.Empty;
             _settings = new SettingsModel();
-
-            //wholeProgram = new FinanceModel();
 
             return RedirectToAction(nameof(Index));
         }
@@ -171,7 +166,6 @@ namespace Financial.Controllers
         }
         public  async void SaveSettings(object o, EventArgs e)
         {
-            //Thread e = new Thread();
             if (SettingsModel.ErrorFlag == false)
             {
                 SettingsModel.ErrorFlag = true;
