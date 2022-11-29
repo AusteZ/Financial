@@ -1,7 +1,0 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
-
-/src/Migrations/20221118092057_InitialCreate.cs
-/src/Migrations/20221118092057_InitialCreate.Designer.cs
-/src/.vs/Financial/FileContentIndex/30bebc77-7daa-4841-8665-4178f2ab9825.vsidx

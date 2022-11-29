@@ -18,11 +18,6 @@ namespace Financial.Data
         public FinanceContext()
         { }*/
         public FinanceContext(DbContextOptions<FinanceContext> options) : base(options) { }
-
-        public FinanceContext()
-        {
-        }
-
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
             // connect to postgres with connection string from app settings
