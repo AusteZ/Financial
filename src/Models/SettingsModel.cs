@@ -13,6 +13,28 @@ namespace Financial.Models
         [JsonIgnore]
         public List<BaseMoneyModel> PresentList = new List<BaseMoneyModel>();
         private string _sortType = "Date";
+        private string _currencyFrom = "EUR";
+
+        private string _currencyTo = "EUR";
+
+        public string CurrencyFrom
+        {
+            get => _currencyFrom; set
+            {
+                _currencyFrom = value;
+                OnPriceChanged(EventArgs.Empty);
+            }
+        }
+
+        public string CurrencyTo
+        {
+            get => _currencyTo; set
+            {
+                _currencyTo = value;
+                OnPriceChanged(EventArgs.Empty);
+            }
+        }
+
         public string SortType { get => _sortType; set
             {
                 _sortType = value;
@@ -82,6 +104,12 @@ namespace Financial.Models
             if (dm.CompareTo(DateTime.Now) > 0) return DateTime.Now.AddDays(1);
             return dm;
         }
+
+        static public void Convert()
+        {
+
+        }
+        
         static public void Sort (SettingsModel sm){
             var _list = new List<BaseMoneyModel>(sm.PresentList);
             var orderByResult = from s in _list select s;
