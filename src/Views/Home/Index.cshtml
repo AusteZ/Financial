@@ -125,6 +125,7 @@
             <a id="none" asp-controller="Home" asp-action="" class="btn button">Save</a>
             <a onclick="showhide('sortdiv')" class="btn button">Sort</a>
             <a onclick="showhide('filterdiv')" class="btn button">Filter</a>
+            <a onclick="showhide('change')" class="btn button">Change currency</a>
             <a id="none" asp-controller="Home" asp-action="ExpensesReport" class="btn button">Expenses Report</a>
             
             <!--<a onclick="showhide('calculatediv')" class="btn button">Calculate</a>-->
@@ -163,6 +164,30 @@
                 </div>
             </form>
         </div>
+
+         <div id="change" class="form-padding">
+            <form asp-controller="Home" asp-action="Convert" method="post">
+                <div>
+                    <label class="form-label">Change currency from</label>
+                    <select asp-for=CurrencyFrom class="form-control">
+                        <option id="EUR" value="EUR">EUR</option>
+                        <option id="USD" value="USD">USD</option>
+                        <option id="GBP" value="GBP">GBP</option>
+                    </select>
+                    <label class="form-label">Change currency to</label>
+                    <select asp-for=CurrencyTo class="form-control">
+                        <option id="EUR" value = "EUR" >EUR</option>
+                        <option id="USD" value="USD" >USD</option>
+                        <option id="GBP" value = "GBP" >GBP</option>
+                    </select>
+                </div>
+                
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-light">Submit</button>
+                </div>
+            </form>
+        </div>
+
 
         <br /><br />
         <table class="table text-bg-white">
@@ -228,19 +253,6 @@
         </table>
     </div>
 
-    <div class="modal fade" id="expenseReportModal" role="dialog">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <a href="#" class="close" data-dismiss="modal">×</a>
-                    <h3 class="modal-title">Expenses Report</h3>
-                </div>
-                <div class="modal-body" id="expenseReportModalDiv">
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
         function showhide(buttonid) {
             if (buttonid != "sortdiv") {
@@ -259,15 +271,12 @@
             else {
                 document.getElementById(buttonid).style.display = "none";
             }
+
+             if (buttonid != "change") {
+                document.getElementById("change").style.display = "none";
+            }
         }
 
-        var ReportExpenses = function () {
-            var url = "/Home/ExpensesReport";
-
-            $("#expenseReportModalDiv").load(url, function () {
-                $("#expenseReportModal").modal("show");
-            })
-        }
     </script>
 
 
