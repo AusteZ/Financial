@@ -93,59 +93,6 @@ namespace Financial.Controllers
             return View(expense);
         }
 
-        public IActionResult Convert(SettingsModel sm)
-        {
-            _settings.CurrencyFrom = sm.CurrencyFrom;
-            _settings.CurrencyTo = sm.CurrencyTo;
-            foreach (var exp in _userFinanceList)
-            {
-                if(sm.CurrencyFrom == "EUR" && sm.CurrencyTo == "USD")
-                {
-                    exp.Currency = Currency.Dollar;
-                    exp.Amount *= 1.03M;
-                }
-                if (sm.CurrencyFrom == "EUR" && sm.CurrencyTo == "GBP")
-                {
-                    exp.Currency = Currency.Pound;
-                    exp.Amount *= 0.864M;
-                }
-                if (sm.CurrencyFrom == "USD" && sm.CurrencyTo == "EUR")
-                {
-                    exp.Currency = Currency.Euro;
-                    exp.Amount *= 0.967M;
-                }
-                if (sm.CurrencyFrom == "USD" && sm.CurrencyTo == "GBP")
-                {
-                    exp.Currency = Currency.Pound;
-                    exp.Amount *= 0.836M;
-                }
-                if (sm.CurrencyFrom == "GBP" && sm.CurrencyTo == "USD")
-                {
-                    exp.Currency = Currency.Dollar;
-                    exp.Amount *= 1.195M;
-                }
-                if (sm.CurrencyFrom == "GBP" && sm.CurrencyTo == "EUR")
-                {
-                    exp.Currency = Currency.Euro;
-                    exp.Amount *= 1.56M;
-                }
-                if (sm.CurrencyFrom == "EUR" && sm.CurrencyTo == "EUR")
-                {
-                    break;
-                }
-                if (sm.CurrencyFrom == "USD" && sm.CurrencyTo == "USD")
-                {
-                    break;
-                }
-                if (sm.CurrencyFrom == "GBP" && sm.CurrencyTo == "GBP")
-                {
-                    break;
-                }
-                exp.Amount = System.Math.Round(exp.Amount, 2);
-            }
-            return RedirectToAction(nameof(Index));
-        }
-
         public IActionResult ExpensesReport()
         {
             decimal foodExpense = 0, transportationExpense = 0, housingExpense = 0, utilitiesExpense = 0, healthcareExpense = 0, savingsInvestingExpense = 0, clothingExpense = 0, entertainmentExpense = 0;
