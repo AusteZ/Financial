@@ -122,11 +122,10 @@
 <body>
     <div class ="screen">
         <div>
-            <a id="none" asp-controller="Home" asp-action="
-" class="btn button">Save</a>
+            <a id="none" asp-controller="Home" asp-action="" class="btn button">Save</a>
             <a onclick="showhide('sortdiv')" class="btn button">Sort</a>
             <a onclick="showhide('filterdiv')" class="btn button">Filter</a>
-            <!--<a onclick="showhide('calculatediv')" class="btn button">Calculate</a>-->
+            <a id="none" asp-controller="Home" asp-action="ExpensesReport" class="btn button">Expenses Report</a>
             <a id="none" asp-controller="Home" asp-action="ExpensesForm" class="btn button">Create New
                 Expense</a>
             <a id="none" asp-controller="Home" asp-action="ExpensesForm" asp-route-type="1" class="btn button">
@@ -170,6 +169,7 @@
                     <th scope="col">Name</th>
                     <th scope="col">Amount</th>
                     <th scope="col">Currency</th>
+                    <th scope="col">Category</th>
                     <th scope="col">Place</th>
                     <th scope="col"></th>
                 </tr>
@@ -180,6 +180,7 @@
                     <td>@expense.Product</td>
                     <td>@expense.Amount</td>
                     <td>@expense.Currency</td>
+                    <td>@expense.Category</td>
                     <td>@expense.Place</td>
                     <td>
                         @Html.ActionLink(
@@ -203,6 +204,7 @@
                     <td>@expense.Product</td>
                     <td>@expense.Amount</td>
                     <td>@expense.Currency</td>
+                    <td>@expense.Category</td>
                     <td>@expense.Place</td>
                     <td>
                         @Html.ActionLink(
@@ -223,6 +225,7 @@
                 }}
         </table>
     </div>
+
     <script>
         function showhide(buttonid) {
             if (buttonid != "sortdiv") {
@@ -242,7 +245,11 @@
                 document.getElementById(buttonid).style.display = "none";
             }
         }
+
     </script>
+
+
+
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
         crossorigin="anonymous"></script>
@@ -253,6 +260,8 @@
         integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
         crossorigin="anonymous"></script>
     <script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.css Jump " rel="stylesheet">
 
     <!--<script>
         document.getElementById('interface-output').onchange = function () {

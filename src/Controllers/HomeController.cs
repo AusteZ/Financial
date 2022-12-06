@@ -5,8 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Text;
-using static Financial.Controllers.HomeController;
-using static System.Net.Mime.MediaTypeNames;
+using System.Collections.Generic;
 
 namespace Financial.Controllers
 {
@@ -94,6 +93,48 @@ namespace Financial.Controllers
             return View(expense);
         }
 
+        public IActionResult ExpensesReport()
+        {
+            decimal foodExpense = 0, transportationExpense = 0, housingExpense = 0, utilitiesExpense = 0, healthcareExpense = 0, savingsInvestingExpense = 0, clothingExpense = 0, entertainmentExpense = 0;
+            
+
+            foreach (var exp in _userFinanceList)
+            {
+                if(exp.isExpense == true)
+                {
+
+                    if (exp.Category == "Food") foodExpense += exp.Amount;
+                    else if (exp.Category == "Transportation") transportationExpense += exp.Amount;
+                    else if (exp.Category == "Housing") housingExpense += exp.Amount;
+                    else if (exp.Category == "Utilities") utilitiesExpense += exp.Amount;
+                    else if (exp.Category == "Healthcare") healthcareExpense += exp.Amount;
+                    else if (exp.Category == "Saving&Investing") savingsInvestingExpense += exp.Amount;
+                    else if (exp.Category == "Clothing") clothingExpense += exp.Amount;
+                    else if (exp.Category == "Entertainment") entertainmentExpense += exp.Amount;
+
+                }
+ 
+            }
+
+            List<DataPoint> dataPoints = new List<DataPoint>();
+
+
+            dataPoints.Add(new DataPoint("Food", System.Math.Abs(foodExpense)));
+            dataPoints.Add(new DataPoint("Transportation", System.Math.Abs(transportationExpense)));
+            dataPoints.Add(new DataPoint("Housing", System.Math.Abs(housingExpense)));
+            dataPoints.Add(new DataPoint("Utilities", System.Math.Abs(utilitiesExpense)));
+            dataPoints.Add(new DataPoint("Healthcare", System.Math.Abs(healthcareExpense)));
+            dataPoints.Add(new DataPoint("Saving and investing", System.Math.Abs(savingsInvestingExpense)));
+            dataPoints.Add(new DataPoint("Clothing", System.Math.Abs(clothingExpense)));
+            dataPoints.Add(new DataPoint("Entertainment", System.Math.Abs(entertainmentExpense)));
+
+
+            ViewBag.DataPoints = JsonConvert.SerializeObject(dataPoints);
+
+            return View();
+        }
+       
+
         public IActionResult ExpenseLine(BaseMoneyModel bmm)
         {
             if (bmm.UserId != _currentUser)
@@ -127,6 +168,7 @@ namespace Financial.Controllers
             //_users.Settings
             return RedirectToAction(nameof(Index));
         }
+
         public IActionResult Filter(SettingsModel sm)
         {
             _settings.From = sm.From;
