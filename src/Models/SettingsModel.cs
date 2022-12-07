@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using NuGet.Configuration;
 using System.Drawing.Printing;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Financial.Models
 {
@@ -12,51 +13,16 @@ namespace Financial.Models
         public static bool ErrorFlag { get; set; } = false;
         [JsonIgnore]
         public List<BaseMoneyModel> PresentList = new List<BaseMoneyModel>();
-        private string _sortType = "Date";
-        public string SortType { get => _sortType; set
-            {
-                _sortType = value;
-                OnPriceChanged(EventArgs.Empty);
-            } 
-        }
-        private bool sortDec = false, isExpense = true, isIncome = true;
-        public bool SortDec { get => sortDec; set
-            {
-                sortDec = value;
-                OnPriceChanged(EventArgs.Empty);
-            }
-        }
-        public bool IsExpense
-        {
-            get => isExpense; set
-            {
-                isExpense = value;
-                OnPriceChanged(EventArgs.Empty);
-            }
-        }
-        public bool IsIncome
-        {
-            get => isIncome; set
-            {
-                isIncome = value;
-                OnPriceChanged(EventArgs.Empty);
-            }
-        }
-        private DateTime _from = DateTime.Now.AddDays(1), _to = DateTime.Now.AddDays(1);
-        public DateTime From {
-            get => _from;
-            set => _from = _to.CompareTo(value) < 0 ? checkDate(value) : DateTime.Now.AddDays(1);
-        }
-        public DateTime To
-        {
-            get => _to;
-            set
-            {
-                _to = checkDate(value);
-                _from = _to.CompareTo(_from) < 0 ? _from : DateTime.Now.AddDays(1);
-            }
-        }
-        private EventHandler _priceChanged;
+        public string SortType { get; set; } = "";
+        public bool SortDec { get; set; }
+        public bool IsExpense {get; set;}
+        public bool IsIncome { get; set; }
+        
+        public decimal budget { get; set; }
+
+        public decimal monthlyExpenses { get; set; }
+        
+        private EventHandler _priceChanged; //events
         public event EventHandler PriceChanged
         {
             add
@@ -72,7 +38,21 @@ namespace Financial.Models
             }
         }
 
-
+        private DateTime _from = DateTime.Now.AddDays(1), _to = DateTime.Now.AddDays(1);
+        public DateTime From
+        {
+            get => _from;
+            set => _from = _to.CompareTo(value) < 0 ? checkDate(value) : DateTime.Now.AddDays(1);
+        }
+        public DateTime To
+        {
+            get => _to;
+            set
+            {
+                _to = checkDate(value);
+                _from = _to.CompareTo(_from) < 0 ? _from : DateTime.Now.AddDays(1);
+            }
+        }
         protected virtual void OnPriceChanged(EventArgs e)
         {
             _priceChanged?.Invoke(this, e);
@@ -82,7 +62,7 @@ namespace Financial.Models
             if (dm.CompareTo(DateTime.Now) > 0) return DateTime.Now.AddDays(1);
             return dm;
         }
-        static public void Sort (SettingsModel sm){
+        public void Sort (SettingsModel sm){
             var _list = new List<BaseMoneyModel>(sm.PresentList);
             var orderByResult = from s in _list select s;
             if (sm.SortType == "Name")
@@ -110,10 +90,11 @@ namespace Financial.Models
                                 select s;
             }
             sm.PresentList = new List<BaseMoneyModel>(orderByResult);
+            OnPriceChanged(EventArgs.Empty);
         }
-        static public void Filter(SettingsModel sm)
+        public void Filter(SettingsModel sm, List<BaseMoneyModel> li)
         {
-            var query = from s in sm.PresentList select s;
+            var query = from s in li select s;
             if (sm.From.CompareTo(DateTime.Now) < 0)
             {
                 /*query = from finance in query
@@ -132,6 +113,18 @@ namespace Financial.Models
                     select finance;
 
             sm.PresentList = new List<BaseMoneyModel>(query);
+            OnPriceChanged(EventArgs.Empty);
+        }
+        public void CountExpenses(List<BaseMoneyModel> _list)
+        {
+            monthlyExpenses = 0;
+            var query = from i in _list
+                    where i.Date.HasValue && i.isExpense == true && i.Date.Value.Month == DateTime.Now.Month
+                    select i;
+            foreach(var t in query){
+                monthlyExpenses += t.Amount;
+            }
+            OnPriceChanged(EventArgs.Empty);
         }
     }
 }
