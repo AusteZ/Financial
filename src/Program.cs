@@ -1,5 +1,8 @@
 using Financial.Data;
+using Financial.Interfaces;
+using Financial.Middleware;
 using Financial.Models;
+using Financial.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Configuration;
@@ -12,6 +15,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<FinanceContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("FinanceDB")));
 builder.Services.AddSingleton<List<BaseMoneyModel>>();
 builder.Services.AddSingleton<SettingsModel>();
+builder.Services.AddTransient<IBufferedFileUploadService, BufferedFileUploadLocalService>();
 
 var app = builder.Build();
 
@@ -22,6 +26,10 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseDateLogMiddleware();
+
+app.UseBrowserMiddleware();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
